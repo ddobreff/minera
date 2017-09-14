@@ -7,3 +7,4 @@ minera-bin/cgminerStartupScript
 assets/vendor/*
 node_modules
 *.log
+.idea/*

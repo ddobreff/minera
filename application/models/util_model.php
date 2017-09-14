@@ -102,11 +102,12 @@ class Util_model extends CI_Model {
 			$this->config->set_item('minerd_log_file', '/var/log/minera/'.$this->_minerdSoftware.'.log');
 			$this->config->set_item('minerd_special_log', true);
 			$this->config->set_item('minerd_log_url', 'application/logs/'.$this->_minerdSoftware.'.log');
-			$this->load->model('cgminer_model', 'miner');
+			$this->load->model($this->_minerdSoftware.'_model', 'miner');
 		}
 		
-		if ($network) $this->load->model('cgminer_model', 'network_miner');
-		
+		if ($network) {
+			$this->load->model($this->_minerdSoftware.'_model', 'network_miner');
+		}
 		return true;
 	}
 	
@@ -211,7 +212,7 @@ class Util_model extends CI_Model {
 		
 		if (count($netMiners) > 0)
 		{
-			$this->load->model('cgminer_model', 'network_miner');
+			$this->load->model($this->_minerdSoftware.'_model', 'network_miner');
 			
 			foreach ($netMiners as $netMiner) {
 				$a[$netMiner->name] = new stdClass();
@@ -251,6 +252,9 @@ class Util_model extends CI_Model {
 				if ($this->_minerdSoftware == "cpuminer" && !$network) {
 					$pools = (isset($a->pools)) ? $a->pools : false;
 				} 
+				else if ($this->_minerdSoftware == "claymoredualminer" || $this->_minerdSoftware == "claymorezecminer" || $this->_minerdSoftware == "claymorexmrminer") {
+
+				}
 				else
 				{
 					$devicePoolActives = false;
@@ -2111,21 +2115,33 @@ class Util_model extends CI_Model {
 		$minerdCommand = $this->getCommandLine();
 		$scryptEnabled = $this->redis->get("minerd_scrypt");
 		$algo = "SHA-256";
+		$miner = $this->redis->get('minerd_software');
 
-		if ($running)
-		{
-			if ($scryptEnabled || preg_match("/scrypt/i", $minerdCommand) || $this->redis->get("minerd_running_software") == "cpuminer")
-			{
-				$algo = "Scrypt";
-			}			
+		if ($running) {
+			$miner = $this->redis->get("minerd_running_software");
 		}
-		else
+
+
+		if ($scryptEnabled || preg_match("/scrypt/i", $minerdCommand) || $miner == "cpuminer")
 		{
-			if ($scryptEnabled || preg_match("/scrypt/i", $minerdCommand) || $this->redis->get('minerd_software') == "cpuminer")
-			{
-				$algo = "Scrypt";
-			}	
+			$algo = "Scrypt";
 		}
+		else if (preg_match("/epool/i", $minerdCommand) || $miner == "claymoredualminer")
+		{
+			$algo = "Ethash";
+			if (preg_match("/dpool/i", $minerdCommand)) {
+				$algo += '+Dual';
+			}
+		}	
+		else if (preg_match("/zpool/i", $minerdCommand) || $miner == "claymorezecminer")
+		{
+			$algo = "Equihash";
+		}			
+		else if ($miner == "claymorexmrminer")
+		{
+			$algo = "CryptoNight";
+		}			
+
 		
 		return $algo;
 	}
