@@ -1151,17 +1151,63 @@ class Util_model extends CI_Model {
 	
 	// Get profitability per coin
 	public function getProfitability($coin = null) {
-		$ctx = stream_context_create(array('http' => array('timeout' => 10)));
+		// handle by custom Profitability
+/*		$ctx = stream_context_create(array('http' => array('timeout' => 10)));
 		$profit = json_encode(array());
 		
-		//$profit = @file_get_contents($this->config->item('minera_api_url').'/profit', 0, $ctx);
+		$profit = @file_get_contents($this->config->item('minera_api_url').'/profit', 0, $ctx);
 		
-		$profitGPU = @file_get_contents($this->config->item('profitable_api_gpu'), 0, $ctx);
-		$profitASIC = @file_get_contents($this->config->item('profitable_api_asic'), 0, $ctx);
+		return $profit;
+*/
+		return $this->getCustomProfitability($coin);
+	}
 
+	public function getCustomProfitability($coin = null)
+	{
+		$ctx = stream_context_create(array('http' => array('timeout' => 10)));
+		$profit = array();
+		$btc_price = false;
+	
+		$profitASIC = json_encode(@file_get_contents($this->config->item('profitable_api_asic'), 0, $ctx));
+		$profitGPU = json_encode(@file_get_contents($this->config->item('profitable_api_gpu'), 0, $ctx));
+		
 		$coins = $this->config->item('profitable_api_coins');
 		
-		
+		if (isset($profitASIC->coins->Bitcoin))
+			$btc_price = $profitASIC->coins->Bitcoin->exchange_rate;
+
+		foreach ($coins as $coinName) {
+			$coin = $profitASIC->coins->{$coinName};
+			$isBtc = ($coinName=='Bitcoin');
+
+			if (!isset($coin) && isset($profitASIC->coins->{$coinName})) {
+				$coin = $profitASIC->coins->{$coinName};
+			}
+			else {
+				continue;
+			}
+			$newCoin = new stdClass();
+			$newCoin->symbol = $coin->tag;
+			$newCoin->coin = $coinName;
+			$newCoin->algo = $coin->algorithm;
+			$newCoin->difficulty = $coin->difficulty;
+			$newCoin->blocks = $coin->last_block;
+			$newCoin->networkhashps = $coin->nethash;
+			$newCoin->btcValue = ($isBtc) ? 1 : ($btc_price) ? $coin->exchange_rate / $btc_price : 1;
+			$newCoin->price = $newCoin->btcValue;
+			$newCoin->hashrate = 1000000;			
+			// 86400.0 second per day
+			/*
+				$hashTime = ((float) $difficulty) * (pow(2.0, 32) / ($hashRate * 1000.0)) ;
+				$blocksPerDay =  (* 24.0 * 3600.0) / $hashTime ;
+				$coinsPerDay = $blockCoins * $blocksPerDay;
+			*/
+			$newCoin->coin_profitability = $coin->block_reward * (86400.0) / ((float) $newCoin-> $difficulty) * (pow(2.0, 32) / ($newCoin->hashrate));
+			$newCoin->btc_profitability = ($isBtc) ? $newCoin->coin_profitability : $newCoin->btcValue * $newCoin->coin_profitability;
+			$newCoin->timestamp = $coin->timestamp;
+			//array_push($profit, $newCoin);
+			$profit[]=$newCoin;
+		}
 
 		return $profit;
 	}
@@ -1382,9 +1428,9 @@ class Util_model extends CI_Model {
 	
 	// Check Minera ads-free
 	public function checkAdsFree() {		
-		$check = @file_get_contents($this->config->item('minera_api_url').'/checkAds/'.$this->generateMineraId());
-		$checkE = json_decode($check);
-
+		//$check = @file_get_contents($this->config->item('minera_api_url').'/checkAds/'.$this->generateMineraId());
+		//$checkE = json_decode($check);
+		$checkE->success= true;
 		if ($checkE->success) {
 			//log_message("error", "[Ads Free] TRUE");
 			$this->redis->set('is_ads_free', true);
@@ -2513,7 +2559,16 @@ class Util_model extends CI_Model {
 		        $opens[] = array('ip' => $address, 'name' => $this->getRandomStarName());
 		
 		        fclose($connection);
-		    }
+			}
+			
+			$connection = @fsockopen($address, 3333, $errno, $errstr, 0.01);
+			
+			if (is_resource($connection) && !in_array($address, $current))
+			{
+				$opens[] = array('ip' => $address, 'name' => $this->getRandomStarName());
+		
+				fclose($connection);
+			}			
 		}
 		
 		return $opens;
