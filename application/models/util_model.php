@@ -225,7 +225,11 @@ class Util_model extends CI_Model {
 						$a[$netMiner->name] = $n;
 					else {
 						if ($n) {
-							$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
+							if (method_exists($this->network_miner,'getParsedStats'))
+								$a[$netMiner->name] = json_decode($this->network_miner->getParsedStats($n, true));
+							else 
+								$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
+
 							$a[$netMiner->name]->pools = $n->pools;
 						}
 					}
@@ -253,7 +257,32 @@ class Util_model extends CI_Model {
 					$pools = (isset($a->pools)) ? $a->pools : false;
 				} 
 				else if ($this->_minerdSoftware == "claymoredualminer" || $this->_minerdSoftware == "claymorezecminer" || $this->_minerdSoftware == "claymorexmrminer") {
+					
+					$hashResult = explode(';', $a->result[2]);
 
+					$stats = new stdClass();
+					$stats->start_time = false;
+					$stats->accepted = $hashResult[1];
+					$stats->rejected = $hashResult[2];
+					$stats->shares = false;
+					$stats->stop_time = false;
+					$stats->stats_id = 1;
+
+					$newpool = new stdClass();
+					$newpool->priority = false;
+					$newpool->url =  explode(';', $a->result[7])[0];
+					$newpool->active = true;
+					$newpool->user = false;
+					$newpool->pass = false;
+					$newpool->stats = array($stats);
+					$newpool->stats_id = 1;
+					$newpool->alive = 1;
+					
+					$pools[] = $newpool;
+					
+					unset($hashResult);
+					unset($newpool);
+					unset($stats);
 				}
 				else
 				{
@@ -1125,8 +1154,15 @@ class Util_model extends CI_Model {
 		$ctx = stream_context_create(array('http' => array('timeout' => 10)));
 		$profit = json_encode(array());
 		
-		$profit = @file_get_contents($this->config->item('minera_api_url').'/profit', 0, $ctx);
+		//$profit = @file_get_contents($this->config->item('minera_api_url').'/profit', 0, $ctx);
 		
+		$profitGPU = @file_get_contents($this->config->item('profitable_api_gpu'), 0, $ctx);
+		$profitASIC = @file_get_contents($this->config->item('profitable_api_asic'), 0, $ctx);
+
+		$coins = $this->config->item('profitable_api_coins');
+		
+		
+
 		return $profit;
 	}
 	
@@ -2144,6 +2180,20 @@ class Util_model extends CI_Model {
 
 		
 		return $algo;
+	}
+
+	public function IsGPUMining($running = true) {
+
+		switch ($this->checkAlgo($running)) {
+			case "Ethash":
+			case "Ethash+Dual":
+			case "Equihash":
+			case "CryptoNight":
+				return true;
+				break;
+			default:
+				return false;
+		}		
 	}
 	
 	/*

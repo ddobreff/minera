@@ -37,5 +37,10 @@ $config['ads'] = Array(
 	'234x60' => '<iframe data-aa="499550" src="//ad.a-ads.com/499550?size=234x60&title_color=ff4d50&title_hover_color=ff0000&text_color=333333&link_color=3C8DBC&link_hover_color=ff0000" scrolling="no" style="width:234px; height:60px; border:0px; padding:0;overflow:hidden" allowtransparency="true"></iframe>',
 	'468x60' => '<iframe data-aa="499552" src="//ad.a-ads.com/499552?size=468x60&title_color=ff4d50&title_hover_color=ff0000&text_color=333333&link_color=3C8DBC&link_hover_color=ff0000" scrolling="no" style="width:468px; height:60px; border:0px; padding:0;overflow:hidden" allowtransparency="true"></iframe>'
 );
+
+$config['profitable_api_gpu'] = 'https://whattomine.com/coins.json';
+$config['profitable_api_asic'] = 'https://whattomine.com/asic.json';
+$config['profitable_api_coins'] = ['Bitcoin','BitcoinCash','Litecoin','Dash','Ethereum','Zcash','Monero'];
+
 /* End of file autoload.php */
 /* Location: ./application/config/app.php */
