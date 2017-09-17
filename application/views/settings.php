@@ -985,6 +985,148 @@
 						    	<p class="small">Pools for network devices can be handle from the dashboard</p>
 						    </div>
 	                    </div>
+
+	                    <!-- GPU Network Miners box -->
+						<div class="box box-primary" id="gpu-network-miners-box">
+						    <div class="box-header">
+						    	<!-- tools box -->
+	                            <div class="pull-right box-tools">
+	                                <button class="btn btn-default btn-xs" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse"><i class="fa fa-minus"></i></button>
+	                            </div><!-- /. tools -->
+	                            <i class="fa fa-server"></i>
+	                            
+	                            <h3 class="box-title">GPU Network Miners Settings</h3>
+	                        </div>
+						    
+	                        <div class="box-body">
+								<p>You can scan your network or add your network device manually. If you have GPU miners with a networked connection, now you can control them in Minera.</p>
+								<h6>Network names are picked up randomly from a small constellation database, you can change it.</h6>
+						    	<p><button class="btn bg-olive scan-gpu-network">Scan GPU network</button></p>
+
+								<div class="alert alert-warning alert-no-gpu-net-devices" style="display:none">There aren't new network devices, try to add them manually.</div>
+
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-4 col-sm-6 col-xs-12">
+											<label>Prefer GPU Miner Software</label>
+											<select class="form-control gpu_net_miner_software" name="gpu_net_miner_software">
+												<option value="claymoredualminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymoredualminer") echo "selected" ?>>Claymore Dual Miner</option>
+												<option value="claymorezecminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymorezecminer") echo "selected" ?>>Claymore Zec Miner</option>
+												<option value="claymorexmrminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymorexmrminer") echo "selected" ?>>Claymore Xmr Miner</option>															
+											</select>										
+										</div>
+									</div>
+								</div>											
+								<div class="form-group">
+                                    <div class="row">
+										<div class="col-xs-1">
+											<strong>Status</strong>
+										</div>
+										<div class="col-xs-3">
+											<strong>Miner Name</strong>
+										</div>
+										<div class="col-xs-3">
+											<strong>Miner IP</strong>
+										</div>
+										<div class="col-xs-2">
+											<strong>Miner Port</strong>
+										</div>
+										<div class="col-xs-2">
+											<strong>Miner Algorithm</strong>
+										</div>
+                                    </div>
+								</div>
+								<!-- Main Pool -->
+								<div class="gpuNetSortable ui-sortable">
+									<?php if (count($gpuNetworkMiners) > 0) : ?>
+										<?php foreach($gpuNetworkMiners as $networkMiner) : $isOnlineNet = $this->util_model->checkNetworkDevice($networkMiner->ip, $networkMiner->port); ?>
+										<div class="form-group gpu-net-group">
+										    <div class="row sort-attach net-row">
+										    	<div class="col-xs-1 text-center">
+										    		<span class="label <?php if ($isOnlineNet) : ?>label-success<?php else : ?>label-danger<?php endif; ?> net_miner_status"><?php if ($isOnlineNet) : ?>Online<?php else: ?>Offline<?php endif; ?></span>
+										    	</div>
+										    	<div class="col-xs-3">
+										    		<div class="input-group">
+										    			<span class="input-group-addon"><i class="fa fa-server"></i></span>
+										    			<input type="text" class="form-control gpu_net_miner_name" placeholder="Miner Name" name="gpu_net_miner_name[]" value="<?php echo (isset($networkMiner->name)) ? $networkMiner->name : ''; ?>" />
+										    		</div>
+										    	</div>
+										    	<div class="col-xs-3">
+										    		<div class="input-group">
+										    			<span class="input-group-addon"><i class="fa fa-hdd-o"></i></span>
+										    			<input type="text" class="form-control gpu_net_miner_ip" placeholder="Miner Ip Address" name="gpu_net_miner_ip[]" value="<?php echo (isset($networkMiner->ip)) ? $networkMiner->ip : ''; ?>" />
+										    		</div>
+										    	</div>
+										    	<div class="col-xs-2">
+										    		<div class="input-group">
+										    			<span class="input-group-addon"><i class="fa fa-arrow-right"></i></span>
+										    			<input type="text" class="form-control gpu_net_miner_port" placeholder="Miner Port" name="gpu_net_miner_port[]" value="<?php echo (isset($networkMiner->port)) ? $networkMiner->port : ''; ?>" />
+										    		</div>
+										    	</div>
+										    	<div class="col-xs-2">
+										    		<div class="input-group">
+										    			<select class="form-control gpu_net_miner_algo" name="gpu_net_miner_algo[]">
+											    			<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "Ethash") echo "selected" ?>>Ethash</option>
+															<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "Equihash") echo "selected" ?>>Equihash</option>
+															<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "CryptoNight") echo "selected" ?>>CryptoNight</option>															
+										    			</select>
+										    		</div>
+										    	</div>
+										    	<div class="col-xs-1">
+										    		<button style="margin-top:5px;" class="btn btn-danger btn-xs del-gpu-net-row" name="del-gpu-net-row" value="1"><i class="fa fa-times"></i></button>
+										    	</div>
+										    </div>
+										</div>
+										<?php endforeach; ?>
+									<?php endif; ?>
+									<!-- fake row to be cloned -->
+									<div class="form-group gpu-net-group gpu-net-group-master" style="display:none;">
+									    <div class="row sort-attach net-row">
+									    	<div class="col-xs-1 text-center">
+									    		<span style="width: 40px;" class="label label-primary net_miner_status">New</span>
+									    	</div>
+									    	<div class="col-xs-3">
+									    		<div class="input-group">
+									    			<span class="input-group-addon"><i class="fa fa-server"></i></span>
+									    			<input type="text" class="form-control gpu_net_miner_name" placeholder="Miner Name" name="gpu_net_miner_name[]" value="" />
+									    		</div>
+									    	</div>
+									    	<div class="col-xs-3">
+									    		<div class="input-group">
+									    			<span class="input-group-addon"><i class="fa fa-hdd-o"></i></span>
+									    			<input type="text" class="form-control gpu_net_miner_ip" placeholder="Miner Ip Address" name="gpu_net_miner_ip[]" value="" />
+									    		</div>
+									    	</div>
+									    	<div class="col-xs-2">
+									    		<div class="input-group">
+									    			<span class="input-group-addon"><i class="fa fa-arrow-right"></i></span>
+									    			<input type="text" class="form-control gpu_net_miner_port" placeholder="Miner Port" name="gpu_net_miner_port[]" value="" />
+									    		</div>
+									    	</div>
+									    	<div class="col-xs-2">
+									    		<div class="input-group">
+									    			<select class="form-control gpu_net_miner_algo" name="gpu_net_miner_algo[]">
+											    		<option>Ethash</option>
+														<option>Equihash</option>
+														<option>CryptoNight</option>														
+									    			</select>
+									    		</div>
+									    	</div>
+									    	<div class="col-xs-1">
+									    		<button style="margin-top:5px;" class="btn btn-danger btn-xs del-net-row" name="del-net-row" value="1"><i class="fa fa-times"></i></button>
+									    	</div>
+									    </div>
+									</div>
+									
+								</div><!-- sortable -->
+								<div>
+									<button class="btn btn-default btn-sm add-gpu-net-row" name="add-gpu-net-row" value="1"><i class="fa fa-plus"></i> Add Network Miner</button>
+								</div>								
+	                        </div>
+						    <div class="box-footer">
+						    	<p class="small">Pools for network devices can be handle from the dashboard</p>
+						    </div>
+	                    </div>						
 	                                            
                         <!-- System box -->
 						<div class="box box-primary" id="system-box">

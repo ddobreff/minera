@@ -129,7 +129,9 @@ class App extends Main_Controller {
 		$data['minerdRunning'] = $this->redis->get("minerd_running_software");
 		$data['minerdRunningUser'] = $this->redis->get("minerd_running_user");
 		$data['minerdSoftware'] = $this->redis->get("minerd_software");
+		$data['gpuNetMinersSoftware'] = $this->redis->get("gpu_network_miners_software");
 		$data['netMiners'] = $this->util_model->getNetworkMiners();
+		$data['gpuNetMiners'] = $this->util_model->getGPUNetworkMiners();
 		$data['localAlgo'] = $this->util_model->checkAlgo($this->util_model->isOnline());
 		$data['adsFree'] = $this->redis->get('is_ads_free');
 		$data['env'] = $this->config->item('ENV');
@@ -251,7 +253,10 @@ class App extends Main_Controller {
 		
 		$data['networkMiners'] = json_decode($this->redis->get('network_miners'));
 		$data['netMiners'] = $this->util_model->getNetworkMiners();
-		
+		$data['gpuNetworkMiners'] = json_decode($this->redis->get('gpu_network_miners'));
+		$data['gpuNetMiners'] = $this->util_model->getGPUNetworkMiners();
+		$data['gpuNetMinersSoftware'] = $this->redis->get('gpu_network_miners_software');
+
 		// Load Dashboard settings
 		$data['mineraStoredDonations'] = $this->util_model->getStoredDonations();
 		$data['mineraDonationTime'] = $this->redis->get("minera_donation_time");
@@ -398,7 +403,38 @@ class App extends Main_Controller {
 
 			$this->redis->set('network_miners', json_encode($netMiners));
 			$dataObj->network_miners = json_encode($netMiners);
+
+
+			//GPU Network miners
+			$gpuNetMinersNames = $this->input->post('gpu_net_miner_name');
+			$gpuNetMinersIps = $this->input->post('gpu_net_miner_ip');
+			$gpuNetMinersPorts = $this->input->post('gpu_net_miner_port');
+			$gpuNetMinersAlgos = $this->input->post('gpu_net_miner_algo');		
+
+
+			$gpuNetMiners = array();
+			foreach ($gpuNetMinersNames as $keyM => $netMinerName)
+			{
+				if (!empty($netMinerName))
+				{
+					if (isset($gpuNetMinersIps[$keyM]) && isset($gpuNetMinersPorts[$keyM]))
+					{
+						//GPU Network Miners
+						$gpuNetMiners[] = array("name" => $netMinerName, "ip" => $gpuNetMinersIps[$keyM], "port" => $gpuNetMinersPorts[$keyM], "algo" => $gpuNetMinersAlgos[$keyM], "pools" => array());
+					}
+				}
+			}	
+
+			$this->redis->set('gpu_network_miners', json_encode($gpuNetMiners));
+			$dataObj->gpu_network_miners = json_encode($gpuNetMiners);		
 			
+			// gpu network miners software
+			$gpuNetMinersSoftware = $this->input->post('gpu_net_miner_software');
+			
+			$this->redis->set('gpu_network_miners_software', $gpuNetMinersSoftware);
+			$this->util_model->switchGPUMinerSoftware($gpuNetMinersSoftware);			
+			$dataObj->gpu_network_miners_software = $gpuNetMinersSoftware;		
+
 			// Save Custom miners
 			$dataObj->custom_miners = $this->input->post('active_custom_miners');
 			$this->redis->set('active_custom_miners', json_encode($this->input->post('active_custom_miners')));
@@ -1014,6 +1050,9 @@ class App extends Main_Controller {
 			case "network_miners_stats":
 				$o = json_encode($this->util_model->getNetworkMinerStats(false));
 			break;
+			case "gpu_network_miners_stats":
+			$o = json_encode($this->util_model->getGPUNetworkMinerStats(false));
+			break;	
 			case "notify_mobileminer":
 				$o = $this->util_model->callMobileminer();
 			break;
@@ -1055,6 +1094,9 @@ class App extends Main_Controller {
 			case "scan_network":
 				$o = json_encode($this->util_model->discoveryNetworkDevices());
 			break;
+			case "scan_gpu_network":
+			$o = json_encode($this->util_model->discoveryGPUNetworkDevices());
+			break;		
 			case "tail_log":
 				$o = json_encode($this->util_model->tailFile($this->input->get('file'), ($this->input->get('lines')) ? $this->input->get('lines') : 5));
 			break;

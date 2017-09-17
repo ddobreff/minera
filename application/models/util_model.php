@@ -8,12 +8,15 @@
 class Util_model extends CI_Model {
 
 	private $_minerdSoftware;
+	private $_gpuMinerdSoftware;
 
 	public function __construct()
 	{
 		// load Miner Model
 		// Switch model for CGMiner/BFGMiner/CPUMiner
 		$this->switchMinerSoftware();
+		// Switch model for GPU Miner
+		$this->switchGPUMinerSoftware();
 		parent::__construct();
 	}
 
@@ -110,6 +113,16 @@ class Util_model extends CI_Model {
 		}
 		return true;
 	}
+
+	public function switchGPUMinerSoftware($software=false){
+		if ($software)
+			$this->_gpuMinerdSoftware = $software;
+		else
+			$this->_gpuMinerdSoftware = $this->redis->get('gpu_network_miners_software');
+
+		$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_network_miner');
+		return true;		
+	}
 	
 	/*
 	//
@@ -158,6 +171,8 @@ class Util_model extends CI_Model {
 		}
 		
 		$a->network_miners = $this->getNetworkMinerStats(true);
+
+		$a->gpu_network_miners = $this->getGPUNetworkMinerStats(true);
 		
 		// Add Minera ID
 		$a->minera_id = $this->generateMineraId();
@@ -212,27 +227,17 @@ class Util_model extends CI_Model {
 		
 		if (count($netMiners) > 0)
 		{
-			//$this->load->model($this->_minerdSoftware.'_model', 'network_miner');
-			$this->load->model('claymoredualminer_model', 'network_miner');
+			$this->load->model($this->_minerdSoftware.'_model', 'network_miner');
 			foreach ($netMiners as $netMiner) {
 				$a[$netMiner->name] = new stdClass();				
 				if ($this->checkNetworkDevice($netMiner->ip, $netMiner->port)) 
 				{
 					$n = $this->getMinerStats($netMiner->ip.":".$netMiner->port);
-					log_message('error', 'MinerStats ---');
-					log_message('error', ' the stats ->'.json_encode($n));
 					if ($parsed === false)
 						$a[$netMiner->name] = $n;
 					else {
 						if ($n) {
-							//log_message('error', 'netMiners has Own getParsedStats :'.json_encode(method_exists($this->network_miner,'getParsedStats')));
-							if (method_exists($this->network_miner,'getParsedStats')){
-								$a[$netMiner->name] = json_decode($this->network_miner->getParsedStats($n, true));
-							}
-							else {
-								$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
-							}
-							log_message('error', 'netMiners has Own Stats :'. json_encode($a[$netMiner->name]));
+							$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
 							$a[$netMiner->name]->pools = $n->pools;
 						}
 					}
@@ -243,6 +248,39 @@ class Util_model extends CI_Model {
 		}
 
 		return $a;
+	}
+
+	public function getGPUNetworkMinerStats($parsed) {
+		$a = array();
+		$netMiners = $this->getGPUNetworkMiners();		
+		if (count($netMiners) > 0)
+		{
+			$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_network_miner');
+			foreach ($netMiners as $netMiner) {
+				$a[$netMiner->name] = new stdClass();				
+				if ($this->checkNetworkDevice($netMiner->ip, $netMiner->port)) 
+				{
+					$n = $this->getGPUMinerStats($netMiner->ip.":".$netMiner->port);
+					if ($parsed === false)
+						$a[$netMiner->name] = $n;
+					else {
+						if ($n) {
+							if (method_exists($this->gpu_network_miner,'getParsedStats')){
+								$a[$netMiner->name] = json_decode($this->gpu_network_miner->getParsedStats($n, true));
+							}
+							else {
+								$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
+							}
+							$a[$netMiner->name]->pools = $n->pools;
+						}
+					}
+				}
+				// Add config data
+				$a[$netMiner->name]->config = array('ip' => $netMiner->ip, 'port' => $netMiner->port, 'algo' => $netMiner->algo);
+			}
+		}
+
+		return $a;		
 	}
 	
 	// Get the specific miner stats
@@ -369,6 +407,63 @@ class Util_model extends CI_Model {
 					}
 				}
 				
+				$a->original_pools = $tmpPools;
+				$a->pools = $pools;
+				return $a;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+		
+		return false;
+	}
+
+	public function getGPUMinerStats($network = false)
+	{
+		$tmpPools = null; $pools = array();
+		
+		if ($this->isOnline($network))
+		{
+			$a = ($network) ? $this->gpu_network_miner->callMinerd(false, $network) : $this->miner->callMinerd();
+
+			if (is_object($a))
+			{
+				//if ($this->_gpuMinerdSoftware == "claymoredualminer" || $this->_gpuMinerdSoftware == "claymorezecminer" || $this->_gpuMinerdSoftware == "claymorexmrminer") {
+					list(,$accepted, $rejected) = explode(';', $a->result[2]);
+
+					$stats = new stdClass();
+					$stats->start_time = false;
+					$stats->accepted = $accepted;
+					$stats->rejected = $rejected;
+					$stats->shares = false;
+					$stats->stop_time = false;
+					$stats->stats_id = 1;
+					
+					list($url) = explode(';', $a->result[7]);
+
+					$newpool = new stdClass();
+					$newpool->priority = false;
+					$newpool->url = $url;
+					$newpool->active = true;
+					$newpool->user = false;
+					$newpool->pass = false;
+					$newpool->stats = array($stats);
+					$newpool->stats_id = 1;
+					$newpool->alive = 1;
+					
+					$pools[] = $newpool;
+					
+					unset($hashResult);
+					unset($newpool);
+					unset($stats);
+				//}
+
 				$a->original_pools = $tmpPools;
 				$a->pools = $pools;
 				return $a;
@@ -1507,6 +1602,11 @@ class Util_model extends CI_Model {
 		return json_decode($this->redis->get('network_miners'));
 	}
 
+	public function getGPUNetworkMiners()
+	{
+		return json_decode($this->redis->get('gpu_network_miners'));
+	}	
+
 	// Check if the minerd if running
 	public function isOnline($network = false)
 	{
@@ -2039,6 +2139,7 @@ class Util_model extends CI_Model {
 		$this->redis->del("export_settings");
 		$this->redis->del("altcoins_data");
 		$this->redis->del("network_miners");
+		$this->redis->del("gpu_network_miners");
 		$this->redis->del("minerd_totals_stats");
 		$this->redis->del("miners_conf");
 		$this->redis->del("miners_conf_update");
@@ -2564,15 +2665,47 @@ class Util_model extends CI_Model {
 		
 		        fclose($connection);
 			}
-			
-			$connection = @fsockopen($address, 3333, $errno, $errstr, 0.01);
-			
-			if (is_resource($connection) && !in_array($address, $current))
-			{
-				$opens[] = array('ip' => $address, 'name' => $this->getRandomStarName());
+		}
 		
-				fclose($connection);
-			}			
+		return $opens;
+		
+	}
+
+	// currently is for claymore
+	public function discoveryGPUNetworkDevices() {
+		$localIp = $_SERVER['SERVER_ADDR'];
+
+		list($w, $x, $y, $z) = explode('.', $localIp);
+				
+		$range = implode(".", array($w, $x, $y, '0'))."/24";
+		$addresses = array();
+		$opens = array();
+		
+		@list($ip, $len) = explode('/', $range);
+		
+		if (($min = ip2long($ip)) !== false) {
+		  $max = ($min | (1<<(32-$len))-1);
+		  for ($i = $min; $i < $max; $i++)
+		    $addresses[] = long2ip($i);
+		}
+
+		$stored = $this->getNetworkMiners();
+		$current = array($localIp);
+		
+		foreach ($stored as $net) {
+			$current[] = $net->ip;
+		}
+		
+		foreach ($addresses as $address)
+		{
+		    $connection = @fsockopen($address, 3333, $errno, $errstr, 0.01);
+		
+		    if (is_resource($connection) && !in_array($address, $current))
+		    {
+		        $opens[] = array('ip' => $address, 'name' => $this->getRandomStarName());
+		
+		        fclose($connection);
+			}
 		}
 		
 		return $opens;

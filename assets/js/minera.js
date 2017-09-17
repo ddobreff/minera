@@ -1086,7 +1086,67 @@ $(function() {
 	        handle: '.sort-attach',
 	        forcePlaceholderSize: true,
 	        zIndex: 999999
-	    });
+		});
+		
+	    // GPU Network miners
+	    $(document).on('click', '.scan-gpu-network', function(e) {
+			e.preventDefault();
+			
+			$('#modal-saving-label').html('Scanning the gpu network, please wait...');
+		 $('#modal-saving').modal('show');
+		 
+		 var scanUrl = _baseUrl+'/app/api?command=scan_gpu_network';
+ 
+		 $.ajax({
+			 type: 'GET',
+			 url: scanUrl,
+			 cache: false,
+			 success:  function(resp){
+				 $('#modal-saving').modal('hide');
+
+				 if (resp.length > 0)
+				 {
+					 $('.gpu-net-group-master').first().clone().prependTo('.gpuNetSortable');
+					 $('.gpu-net-group-master').first().css('display', 'block').removeClass('gpu-net-group-master');
+ 
+					 $.each(resp, function (index, value)
+					 {
+						 $('.gpu-net-group:first .net-row .net_miner_status').html('<i class="fa fa-circle text-success"></i> Online');
+						 $('.gpu-net-group:first .net-row .gpu_net_miner_name').val(value.name);
+						 $('.gpu-net-group:first .net-row .gpu_net_miner_ip').val(value.ip);
+						 $('.gpu-net-group:first .net-row .gpu_net_miner_port').val('3333');
+						 $('.gpu-net-group:first .net-row .net_miner_status').removeClass('label-primary').addClass('label-success');
+					 });
+					 
+					 setTimeout(function () { saveSettings(true, true); }, 2000);
+				 } else {
+					 $('.alert-no-gpu-net-devices').fadeIn();
+					 setTimeout(function () { $('.alert-no-gpu-net-devices').fadeOut(); }, 5000);
+				 }
+			 }
+		 });
+	 });
+	 
+	 $(document).on('click', '.del-gpu-net-row', function(e) {
+		 e.preventDefault();
+		 $(this).closest('.form-group').remove();
+		 saveSettings(false, true);
+	 });
+				 
+	 $(document).on('click', '.add-gpu-net-row', function(e) {
+		 e.preventDefault();
+		 $('.gpu-net-group-master').first().clone().appendTo('.gpuNetSortable');
+		 $('.gpu-net-group-master').last().css('display', 'block').removeClass('gpu-net-group-master');
+	 });
+	 
+	 $('.gpuNetSortable').sortable({
+		 placeholder: 'sort-highlight',
+		 connectWith: '.sort-attach',
+		 handle: '.sort-attach',
+		 forcePlaceholderSize: true,
+		 zIndex: 999999
+	 });		
+
 	    $('.sort-attach').css('cursor','move');
 	    
 	    //Make the dashboard widgets sortable Using jquery UI
