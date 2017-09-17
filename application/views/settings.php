@@ -922,7 +922,6 @@
 										    			<select class="form-control net_miner_algo" name="net_miner_algo[]">
 											    			<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "SHA-256") echo "selected" ?>>SHA-256</option>
 											    			<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "Scrypt") echo "selected" ?>>Scrypt</option>
-											    			<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "Ethash+Dual") echo "selected" ?>>Ethash+Dual</option>
 											    			<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "Ethash") echo "selected" ?>>Ethash</option>
 															<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "Equihash") echo "selected" ?>>Equihash</option>
 															<option <?php if (isset($networkMiner->algo) && $networkMiner->algo === "CryptoNight") echo "selected" ?>>CryptoNight</option>															
@@ -965,6 +964,9 @@
 									    			<select class="form-control net_miner_algo" name="net_miner_algo[]">
 										    			<option>SHA-256</option>
 										    			<option>Scrypt</option>
+											    		<option>Ethash</option>
+														<option>Equihash</option>
+														<option>CryptoNight</option>														
 									    			</select>
 									    		</div>
 									    	</div>

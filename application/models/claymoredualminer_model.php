@@ -76,10 +76,9 @@ class ClaymoreDualminer_model extends CI_Model {
 				$msg = "WARN: '$cmd' returned nothing\n";
 				return array("error" => true, "msg" => $msg);
 			}
-		
+	
 			//print "$cmd returned '$line'\n";
 			if (substr($line,0,1) == '{') {
-				// log_message("error", var_dump(json_decode($line)));
 				return json_decode($line);
 			}
 			
@@ -199,7 +198,7 @@ class ClaymoreDualminer_model extends CI_Model {
 								
 				$name = 'GPU #'.(int)$index;
 				
-				$return['devices'][$name]['temperature'] = (isset($device->result[6])) ? explode(';',($device->result[6]))[$index * 2 + 1] : false;
+				$return['devices'][$name]['temperature'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[$index * 2] : false;
 				$return['devices'][$name]['frequency'] = false;
 				$return['devices'][$name]['accepted'] = 0;
 				$return['devices'][$name]['rejected'] = 0;
@@ -208,7 +207,7 @@ class ClaymoreDualminer_model extends CI_Model {
 				// difficulty
 				$return['devices'][$name]['shares'] = 0;	
 				// hashrate in Mh, convert to h
-				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000*1000);
+				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000);
 				
 				// make it always running due to the last_share checking in app.php
 				$return['devices'][$name]['last_share'] = time();
@@ -223,14 +222,14 @@ class ClaymoreDualminer_model extends CI_Model {
 		}
 
 		if (is_object($stats)) {
-			$totalsHash = explode(";",$stats->result[2]); 
+			list($totalHash, $totalAccepted, $totalRejected) = explode(";", $stats->result[2]);
 			$return['totals']['temperature'] = ($tdtemperature) ? round(($tdtemperature/$d), 2) : false;				
 			$return['totals']['frequency'] = ($tdfrequency) ? round(($tdfrequency/$d), 0) : false;
-			$return['totals']['accepted'] = $totalsHash[1];
-			$return['totals']['rejected'] = $totalsHash[2];
+			$return['totals']['accepted'] = $totalAccepted;
+			$return['totals']['rejected'] = $totalRejected;
 			$return['totals']['hw_errors'] = 0;
 			$return['totals']['shares'] = $tdshares;
-			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalsHash[0];
+			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalHash;
 			$return['totals']['last_share'] = time();	
 		}
 

@@ -129,4 +129,23 @@
     "miner_name": "BFGminer",
     "miner_device": "Zeus Miner + Gridseed mixed",
     "miner_options": "--scrypt -S zus:all --set zus:chips=6 --set zus:clock=328 -S gridseed:all --set-device gridseed:clock=838"
-}]
+},
+{
+    "miner": "claymoredualminer",
+    "miner_name": "ClaymoreDualMiner ETH",
+    "miner_device": "Claymore Dual Miner",
+    "miner_options": ""
+},
+{
+    "miner": "claymorezecminer",
+    "miner_name": "ClaymoreZecMiner",
+    "miner_device": "Claymore Zec Miner",
+    "miner_options": ""
+},
+{
+    "miner": "claymorexmrminer",
+    "miner_name": "ClaymoreXmlMiner",
+    "miner_device": "Claymore XMR Miner",
+    "miner_options": ""
+}
+]

@@ -212,24 +212,27 @@ class Util_model extends CI_Model {
 		
 		if (count($netMiners) > 0)
 		{
-			$this->load->model($this->_minerdSoftware.'_model', 'network_miner');
-			
+			//$this->load->model($this->_minerdSoftware.'_model', 'network_miner');
+			$this->load->model('claymoredualminer_model', 'network_miner');
 			foreach ($netMiners as $netMiner) {
-				$a[$netMiner->name] = new stdClass();
-
+				$a[$netMiner->name] = new stdClass();				
 				if ($this->checkNetworkDevice($netMiner->ip, $netMiner->port)) 
 				{
 					$n = $this->getMinerStats($netMiner->ip.":".$netMiner->port);
-
+					log_message('error', 'MinerStats ---');
+					log_message('error', ' the stats ->'.json_encode($n));
 					if ($parsed === false)
 						$a[$netMiner->name] = $n;
 					else {
 						if ($n) {
-							if (method_exists($this->network_miner,'getParsedStats'))
+							//log_message('error', 'netMiners has Own getParsedStats :'.json_encode(method_exists($this->network_miner,'getParsedStats')));
+							if (method_exists($this->network_miner,'getParsedStats')){
 								$a[$netMiner->name] = json_decode($this->network_miner->getParsedStats($n, true));
-							else 
+							}
+							else {
 								$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
-
+							}
+							log_message('error', 'netMiners has Own Stats :'. json_encode($a[$netMiner->name]));
 							$a[$netMiner->name]->pools = $n->pools;
 						}
 					}
@@ -258,19 +261,21 @@ class Util_model extends CI_Model {
 				} 
 				else if ($this->_minerdSoftware == "claymoredualminer" || $this->_minerdSoftware == "claymorezecminer" || $this->_minerdSoftware == "claymorexmrminer") {
 					
-					$hashResult = explode(';', $a->result[2]);
+					list(,$accepted, $rejected) = explode(';', $a->result[2]);
 
 					$stats = new stdClass();
 					$stats->start_time = false;
-					$stats->accepted = $hashResult[1];
-					$stats->rejected = $hashResult[2];
+					$stats->accepted = $accepted;
+					$stats->rejected = $rejected;
 					$stats->shares = false;
 					$stats->stop_time = false;
 					$stats->stats_id = 1;
+					
+					list($url) = explode(';', $a->result[7]);
 
 					$newpool = new stdClass();
 					$newpool->priority = false;
-					$newpool->url =  explode(';', $a->result[7])[0];
+					$newpool->url = $url;
 					$newpool->active = true;
 					$newpool->user = false;
 					$newpool->pass = false;
@@ -1168,8 +1173,8 @@ class Util_model extends CI_Model {
 		$profit = array();
 		$btc_price = false;
 	
-		$profitASIC = json_encode(@file_get_contents($this->config->item('profitable_api_asic'), 0, $ctx));
-		$profitGPU = json_encode(@file_get_contents($this->config->item('profitable_api_gpu'), 0, $ctx));
+		$profitASIC = json_decode(@file_get_contents($this->config->item('profitable_api_asic'), 0, $ctx));
+		$profitGPU = json_decode(@file_get_contents($this->config->item('profitable_api_gpu'), 0, $ctx));
 		
 		$coins = $this->config->item('profitable_api_coins');
 		
@@ -1180,36 +1185,39 @@ class Util_model extends CI_Model {
 			$coin = $profitASIC->coins->{$coinName};
 			$isBtc = ($coinName=='Bitcoin');
 
-			if (!isset($coin) && isset($profitASIC->coins->{$coinName})) {
-				$coin = $profitASIC->coins->{$coinName};
+			if (!isset($coin) && isset($profitGPU->coins->{$coinName})) {
+				$coin = $profitGPU->coins->{$coinName};
 			}
-			else {
+		
+			if (!isset($coin)) {
 				continue;
 			}
+
 			$newCoin = new stdClass();
 			$newCoin->symbol = $coin->tag;
 			$newCoin->coin = $coinName;
 			$newCoin->algo = $coin->algorithm;
+			$newCoin->reward = $coin->block_reward;
 			$newCoin->difficulty = $coin->difficulty;
 			$newCoin->blocks = $coin->last_block;
-			$newCoin->networkhashps = $coin->nethash;
+			$newCoin->networkhashps = (float)$coin->nethash;
 			$newCoin->btcValue = ($isBtc) ? 1 : ($btc_price) ? $coin->exchange_rate / $btc_price : 1;
 			$newCoin->price = $newCoin->btcValue;
 			$newCoin->hashrate = 1000000;			
 			// 86400.0 second per day
 			/*
-				$hashTime = ((float) $difficulty) * (pow(2.0, 32) / ($hashRate * 1000.0)) ;
+				$hashTime = ($difficulty) * (pow(2.0, 32) / ($hashRate * 1000.0)) ;
 				$blocksPerDay =  (* 24.0 * 3600.0) / $hashTime ;
 				$coinsPerDay = $blockCoins * $blocksPerDay;
 			*/
-			$newCoin->coin_profitability = $coin->block_reward * (86400.0) / ((float) $newCoin-> $difficulty) * (pow(2.0, 32) / ($newCoin->hashrate));
+			$newCoin->coin_profitability = $coin->block_reward * (86400.0) / $newCoin->difficulty * (pow(2.0, 32) / ($newCoin->hashrate));
 			$newCoin->btc_profitability = ($isBtc) ? $newCoin->coin_profitability : $newCoin->btcValue * $newCoin->coin_profitability;
 			$newCoin->timestamp = $coin->timestamp;
 			//array_push($profit, $newCoin);
 			$profit[]=$newCoin;
 		}
 
-		return $profit;
+		return json_encode($profit);
 	}
 	
 	public function getAvgProfitability()
@@ -1429,8 +1437,8 @@ class Util_model extends CI_Model {
 	// Check Minera ads-free
 	public function checkAdsFree() {		
 		//$check = @file_get_contents($this->config->item('minera_api_url').'/checkAds/'.$this->generateMineraId());
-		//$checkE = json_decode($check);
-		$checkE->success= true;
+		$check = '{"error":false,"success":true}';
+		$checkE = json_decode($check);
 		if ($checkE->success) {
 			//log_message("error", "[Ads Free] TRUE");
 			$this->redis->set('is_ads_free', true);
@@ -2211,9 +2219,6 @@ class Util_model extends CI_Model {
 		else if (preg_match("/epool/i", $minerdCommand) || $miner == "claymoredualminer")
 		{
 			$algo = "Ethash";
-			if (preg_match("/dpool/i", $minerdCommand)) {
-				$algo += '+Dual';
-			}
 		}	
 		else if (preg_match("/zpool/i", $minerdCommand) || $miner == "claymorezecminer")
 		{
@@ -2232,7 +2237,6 @@ class Util_model extends CI_Model {
 
 		switch ($this->checkAlgo($running)) {
 			case "Ethash":
-			case "Ethash+Dual":
 			case "Equihash":
 			case "CryptoNight":
 				return true;
@@ -2514,7 +2518,7 @@ class Util_model extends CI_Model {
 	
 	public function checkNetworkDevice($ip, $port=4028) 
 	{		
-		$connection = @fsockopen($ip, 4028, $errno, $errstr, 0.1);
+		$connection = @fsockopen($ip, $port, $errno, $errstr, 0.1);
 		
 	    if (is_resource($connection))
 	    {	

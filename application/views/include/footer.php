@@ -26,7 +26,7 @@
 			<script src="<?php echo base_url($js) ?>" type="text/javascript"></script>
 		<?php endforeach; ?>
 	<?php else : ?>
-		<script src="<?php echo base_url('assets/js/application.min.js') ?>" type="text/javascript"></script>
+		<script src="<?php echo base_url('assets/js/application.js') ?>" type="text/javascript"></script>
 	<?php endif; ?>
 
     <!-- External files -->
