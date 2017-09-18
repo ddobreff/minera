@@ -36,6 +36,8 @@ class App extends Main_Controller {
 		if (!$this->redis->command("EXISTS dashboard_box_local_pools")) $this->redis->set("dashboard_box_local_pools", 1);
 		if (!$this->redis->command("EXISTS dashboard_box_network_details")) $this->redis->set("dashboard_box_network_details", 1);
 		if (!$this->redis->command("EXISTS dashboard_box_network_pools_details")) $this->redis->set("dashboard_box_network_pools_details", 1);
+		if (!$this->redis->command("EXISTS dashboard_box_gpu_network_details")) $this->redis->set("dashboard_box_gpu_network_details", 1);
+		if (!$this->redis->command("EXISTS dashboard_box_gpu_network_pools_details")) $this->redis->set("dashboard_box_gpu_network_pools_details", 1);		
 		if (!$this->redis->command("EXISTS dashboard_box_chart_shares")) $this->redis->set("dashboard_box_chart_shares", 1);
 		if (!$this->redis->command("EXISTS dashboard_box_chart_system_load")) $this->redis->set("dashboard_box_chart_system_load", 1);
 		if (!$this->redis->command("EXISTS dashboard_box_chart_hashrates")) $this->redis->set("dashboard_box_chart_hashrates", 1);
@@ -119,6 +121,8 @@ class App extends Main_Controller {
 		$data['dashboardBoxLocalPools'] = ($this->redis->get("dashboard_box_local_pools")) ? $this->redis->get("dashboard_box_local_pools") : false;
 		$data['dashboardBoxNetworkDetails'] = ($this->redis->get("dashboard_box_network_details")) ? $this->redis->get("dashboard_box_network_details") : false;
 		$data['dashboardBoxNetworkPoolsDetails'] = ($this->redis->get("dashboard_box_network_pools_details")) ? $this->redis->get("dashboard_box_network_pools_details") : false;
+		$data['dashboardBoxGPUNetworkDetails'] = ($this->redis->get("dashboard_box_gpu_network_details")) ? $this->redis->get("dashboard_box_gpu_network_details") : false;	
+		$data['dashboardBoxGPUNetworkPoolsDetails'] = ($this->redis->get("dashboard_box_gpu_network_pools_details")) ? $this->redis->get("dashboard_box_gpu_network_pools_details") : false;			
 		$data['dashboardBoxChartShares'] = ($this->redis->get("dashboard_box_chart_shares")) ? $this->redis->get("dashboard_box_chart_shares") : false;
 		$data['dashboardBoxChartSystemLoad'] = ($this->redis->get("dashboard_box_chart_system_load")) ? $this->redis->get("dashboard_box_chart_system_load") : false;
 		$data['dashboardBoxChartHashrates'] = ($this->redis->get("dashboard_box_chart_hashrates")) ? $this->redis->get("dashboard_box_chart_hashrates") : false;
@@ -272,6 +276,7 @@ class App extends Main_Controller {
 		$data['dashboardBoxLocalPools'] = ($this->redis->get("dashboard_box_local_pools")) ? $this->redis->get("dashboard_box_local_pools") : false;
 		$data['dashboardBoxNetworkDetails'] = ($this->redis->get("dashboard_box_network_details")) ? $this->redis->get("dashboard_box_network_details") : false;
 		$data['dashboardBoxNetworkPoolsDetails'] = ($this->redis->get("dashboard_box_network_pools_details")) ? $this->redis->get("dashboard_box_network_pools_details") : false;
+		$data['dashboardBoxGPUNetworkDetails'] = ($this->redis->get("dashboard_box_gpu_network_details")) ? $this->redis->get("dashboard_box_gpu_network_details") : false;		
 		$data['dashboardBoxChartShares'] = ($this->redis->get("dashboard_box_chart_shares")) ? $this->redis->get("dashboard_box_chart_shares") : false;
 		$data['dashboardBoxChartSystemLoad'] = ($this->redis->get("dashboard_box_chart_system_load")) ? $this->redis->get("dashboard_box_chart_system_load") : false;
 		$data['dashboardBoxChartHashrates'] = ($this->redis->get("dashboard_box_chart_hashrates")) ? $this->redis->get("dashboard_box_chart_hashrates") : false;
@@ -352,6 +357,8 @@ class App extends Main_Controller {
 			$dashboardBoxLocalPools = $this->input->post("dashboard_box_local_pools");
 			$dashboardBoxNetworkDetails = $this->input->post("dashboard_box_network_details");
 			$dashboardBoxNetworkPoolsDetails = $this->input->post("dashboard_box_network_pools_details");
+			$dashboardBoxGPUNetworkDetails = $this->input->post("dashboard_box_gpu_network_details");
+			$dashboardBoxGPUNetworkPoolsDetails = $this->input->post("dashboard_box_gpu_network_pools_details");
 			$dashboardBoxChartShares = $this->input->post("dashboard_box_chart_shares");
 			$dashboardBoxChartSystemLoad = $this->input->post("dashboard_box_chart_system_load");
 			$dashboardBoxChartHashrates = $this->input->post("dashboard_box_chart_hashrates");
@@ -640,6 +647,10 @@ class App extends Main_Controller {
 			$dataObj->dashboard_box_network_details = $dashboardBoxNetworkDetails;
 			$this->redis->set("dashboard_box_network_pools_details", $dashboardBoxNetworkPoolsDetails);
 			$dataObj->dashboard_box_network_pools_details = $dashboardBoxNetworkPoolsDetails;
+			$this->redis->set("dashboard_box_gpu_network_details", $dashboardBoxGPUNetworkDetails);
+			$dataObj->dashboard_box_gpu_network_details = $dashboardBoxGPUNetworkDetails;
+			$this->redis->set("dashboard_box_gpu_network_pools_details", $dashboardBoxGPUNetworkPoolsDetails);
+			$dataObj->dashboard_box_gpu_network_pools_details = $dashboardBoxGPUNetworkPoolsDetails;						
 			$this->redis->set("dashboard_box_chart_shares", $dashboardBoxChartShares);
 			$dataObj->dashboard_box_chart_shares = $dashboardBoxChartShares;
 			$this->redis->set("dashboard_box_chart_system_load", $dashboardBoxChartSystemLoad);

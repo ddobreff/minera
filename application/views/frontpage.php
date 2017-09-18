@@ -237,6 +237,58 @@
 							</div>							
 						</section>
 						<?php endif; ?>
+
+						<!-- gpu network widgets section -->
+						<?php if (count($gpuNetMiners) > 0) : ?>
+						<div class="gpu-network-miners-widget-section">
+							<section class="col-md-12 local-miners-title">
+								<h4>GPU Network <small>Miners</small></h4>
+							</section>
+						</div>
+						
+						<section class="gpu-network-miners-widget-section col-md-12 widgets-section">
+							<div class="row">
+							 	<!-- total network hashrate widget -->
+								<div class="col-lg-4 col-sm-4 col-xs-12">
+									<!-- small box -->
+									<div class="small-box bg-dark-blue">
+										<div class="inner">
+											<h3 class="gpu-network-widget-total-hashrate"><i class="ion spin ion-load-c"></i></h3>
+											<p>Network Pool Hashrate</p>
+										</div>
+										<div class="icon"><i class="ion ion-ios-speedometer"></i></div>
+										<a href="#gpu-network-pools-details" class="small-box-footer">Totals net devices <i class="fa fa-arrow-circle-right"></i></a>
+									</div>
+								</div>
+								
+								<!-- network hw/re widget -->
+								<div class="col-lg-4 col-sm-4 col-xs-12">
+									<!-- small box -->
+									<div class="small-box bg-light2">
+										<div class="inner">
+											<h3 class="gpu-network-widget-hwre-rates"><i class="ion spin ion-load-c"></i></h3>
+											<p>Network Error/Rejected Rates</p>
+										</div>
+										<div class="icon"><i class="ion ion-alert-circled"></i></div>
+										<a href="#gpu-network-details" class="small-box-footer">Details <i class="fa fa-arrow-circle-right"></i></a>
+									</div>
+								</div>
+								
+								<!-- last network share widget -->
+								<div class="col-lg-4 col-sm-4 col-xs-12">
+									<!-- small box -->
+									<div class="small-box bg-light-brown">
+										<div class="inner">
+											<h3 class="gpu-network-widget-last-share"><i class="ion spin ion-load-c"></i></h3>
+											<p>Last Network Share</p>
+										</div>
+										<div class="icon"><i class="ion ion-ios-stopwatch-outline"></i></div>
+										<a href="#gpu-network-details" class="small-box-footer">Network details <i class="fa fa-arrow-circle-right"></i></a>
+									</div>
+								</div>
+							</div>							
+						</section>
+						<?php endif; ?>						
 						
 						<!-- Top section -->
 						<section class="hidden-xs col-md-12 connectedSortable ui-sortable top-section">
@@ -627,6 +679,152 @@
 								</div><!-- /.network pools box -->
 								<?php endif; ?>
 							<?php endif; ?>
+							<?php if ($dashboardBoxGPUNetworkDetails) : ?>
+								<!--GPU Network Miners box -->
+								<?php if (count($gpuNetMiners) > 0) : ?>
+								<div id="box-gpu-network-details" class="box box-light gpu-network-miner-details <?php if (isset($boxStatuses['box-gpu-network-details']) && !$boxStatuses['box-gpu-network-details']) :?>collapsed-box<?php endif; ?>" style="display:none;">
+								   	<div class="overlay"></div>
+								   	<div class="loading-img"></div>
+									<div class="box-header" style="cursor: move;">
+										<!-- tools box -->
+										<div class="pull-right box-tools">
+											<button class="btn btn-default btn-xs" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse"><i class="fa fa-minus"></i></button>
+										</div><!-- /. tools -->
+										<i class="fa fa-server"></i>
+	
+										<h3 class="box-title" id="gpu-miner-details">GPU Network Miners details</h3>
+									</div>
+									<div class="box-body">
+										<div class="row">
+											<div class="col-sm-12">
+												<div class="">
+													  <table id="gpu-network-miner-table-details" class="responsive-datatable-minera table table-striped datatable">
+														  <thead>
+														  <tr>
+															  <th>DEV</th>
+															  <th>Temp</th>
+															  <th>Frequency</th>
+															  <th>Dev HR</th>
+															  <th>Shares</th>
+															  <th>AC</th>
+															  <th>% AC</th>
+															  <th>RE</th>
+															  <th>% RE</th>
+															  <th>HW</th>
+															  <th>% HW</th>
+															  <th>Last share</th>
+															  <th>Last share time</th>
+														  </tr>
+														  </thead>
+														  <tbody class="gpu_network_devs_table">
+														</tbody>
+														  <tfoot class="gpu_network_devs_table_foot">
+														</tfoot>
+													</table><!-- /.table -->
+												  </div>
+											</div>
+										</div><!-- /.row - inside box -->
+									</div><!-- /.box-body -->
+									<div class="box-footer">
+										<div class="legend pull-right">
+									 		<h6>Colors based on last share time: <i class="fa fa-circle text-success"></i> Good&nbsp;&nbsp;&nbsp;<i class="fa fa-circle text-warning"></i> Warning&nbsp;&nbsp;&nbsp;<i class="fa fa-circle text-danger"></i> Critical&nbsp;&nbsp;&nbsp;<i class="fa fa-circle text-muted"></i> Possibly dead</h6>
+										</div>
+										<div>&nbsp;</div>
+									</div>
+								</div><!-- /.network miner box -->
+								<?php endif; ?>
+							<?php endif; ?>		
+							<?php if ($dashboardBoxGPUNetworkPoolsDetails) : ?>
+								<!--GPU Network pools box -->
+								<?php if (count($gpuNetMiners) > 0) : ?>
+								<div id="box-gpu-network-pools-details" class="box box-light <?php if (isset($boxStatuses['box-gpu-network-pools-details']) && !$boxStatuses['box-gpu-network-pools-details']) :?>collapsed-box<?php endif; ?>">
+								   	<div class="overlay"></div>
+								   	<div class="loading-img"></div>
+									<div class="box-header" style="cursor: move;">
+										<!-- tools box -->
+										<div class="pull-right box-tools">
+											<button class="btn btn-default btn-xs" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse"><i class="fa fa-minus"></i></button>
+										</div><!-- /. tools -->
+										<i class="fa fa-cloud"></i>
+	
+										<h3 class="box-title" id="pools-details" >GPU Network Pools details</h3>
+									</div>
+									<div class="box-body">
+										<div class="row">
+											<div class="col-sm-12">
+												<?php $npi = 1; $netCounts = count($gpuNetMiners); ?>
+													<?php foreach ($gpuNetMiners as $netMiner) : ?>
+													<hr />
+													<div id="net-<?php echo md5($netMiner->name) ?>">
+														<div class="mb20 gpu-net-pools-label-<?php echo md5($netMiner->name) ?>"></div>
+														<div class="">
+															  <!-- .table - Uses sparkline charts-->
+															  <table id="gpu-net-pools-table-details-<?php echo md5($netMiner->name) ?>" class="responsive-datatable-minera net-pools-table table table-striped datatable">
+																  <thead>
+																  <tr>
+																	  <th>&nbsp;</th>
+																	  <th>Pool</th>
+																	  <th>Url</th>
+																	  <th>Type</th>
+																	  <th>Status</th>
+																	  <th>Pool HR</th>
+																	  <th>CS</th>
+																	  <th>PS</th>
+																	  <th>CA</th>
+																	  <th>PA</th>
+																	  <th>CR</th>
+																	  <th>PR</th>
+																	  <th>Username</th>
+																  </tr>
+																  </thead>
+																  <tbody class="net_pools_table">
+																</tbody>
+															</table><!-- /.table -->
+															<p class="gpu-net-pool-alert-<?php echo md5($netMiner->name) ?>"></p>
+														</div>
+														<div class="gpu-net-pools-addbox-<?php echo md5($netMiner->name) ?>">
+															<div class="form-group mt10" style="display:none;">
+																<div class="row sort-attach">
+															    	<div class="col-xs-5">
+															    		<div class="input-group">
+															    			<span class="input-group-addon"><i class="fa fa-cloud-download"></i></span>
+															    			<input type="text" class="form-control gpu_pool_url_<?php echo md5($netMiner->name) ?>" placeholder="Pool url" name="pool_url" value="" />
+															    		</div>
+															    	</div>
+															    	<div class="col-xs-3">
+															    		<div class="input-group">
+															    			<span class="input-group-addon"><i class="fa fa-user"></i></span>
+															    			<input type="text" class="form-control gpu_pool_username_<?php echo md5($netMiner->name) ?>" placeholder="username" name="pool_username" value=""  />
+															    		</div>
+															    	</div>
+															    	<div class="col-xs-3">
+															    		<div class="input-group">
+															    			<span class="input-group-addon"><i class="fa fa-lock"></i></span>
+															    			<input type="text" class="form-control gpu_pool_password_<?php echo md5($netMiner->name) ?>" placeholder="password" name="pool_password" value=""  />
+															    		</div>
+															    	</div>
+															    	<div class="col-xs-1">
+															    		<div class="input-group">
+															    			<button class="btn btn-sm btn-success add-gpu-net-pool" data-netminer="<?php echo md5($netMiner->name) ?>" data-network="<?php echo $netMiner->ip.':'.$netMiner->port ?>"><i class="fa fa-plus"></i> Add</button>
+															    		</div>
+															    	</div>
+															    </div>
+															</div>
+														</div>
+														<div class="gpu-net-pool-error-<?php echo md5($netMiner->name) ?> mt10 text-red"></div>
+													</div>
+												<?php $npi++; endforeach; ?>
+											</div>
+										</div><!-- /.row - inside box -->
+									</div><!-- /.box-body -->
+									<div class="box-footer">
+										<h6>Every changes here will be lost if you stop/restart your gpu network miner</h6>
+										<h6>Legend: <strong>CS</strong> = Current Shares, <strong>PS</strong> = Previous shares, <strong>CA</strong> = Current Accepted, <strong>PA</strong> = Previous Accepted, <strong>CR</strong> = Current Rejected, <strong>PR</strong> = Previous Rejected</h6>
+										<h6><strong>Current</strong> is the current or last session, <strong>Previous</strong> is the total of all previous sessions. Pool HashRate is based on shares over the time per session.</h6>
+									</div>
+								</div><!-- /.network pools box -->
+								<?php endif; ?>
+							<?php endif; ?>													
 						</section>
 						
 						<!-- Right col -->

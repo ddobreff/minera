@@ -285,6 +285,10 @@
 													<td><input type="checkbox" name="dashboard_box_chart_shares" value="1" <?php if ($dashboardBoxChartShares) : ?>checked=""<?php endif; ?> /> Shares chart</td>
 												</tr>
 												<tr>
+													<td><input type="checkbox" name="dashboard_box_gpu_network_details" value="1" <?php if ($dashboardBoxGPUNetworkDetails) : ?>checked=""<?php endif; ?> />GPU Network miners</td>
+													<td><input type="checkbox" name="dashboard_box_gpu_network_pools_details" value="1" <?php if ($dashboardBoxGPUNetworkPoolsDetails) : ?>checked=""<?php endif; ?> />GPU Network pools</td>
+												</tr>												
+												<tr>
 													<td><input type="checkbox" name="dashboard_box_chart_system_load" value="1" <?php if ($dashboardBoxChartSystemLoad) : ?>checked=""<?php endif; ?> /> System load</td>
 													<td><input type="checkbox" name="dashboard_box_chart_hashrates" value="1" <?php if ($dashboardBoxChartHashrates) : ?>checked=""<?php endif; ?> /> Hashrates chart</td>
 												</tr>

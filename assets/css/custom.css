@@ -5,7 +5,7 @@
 .padding-vert { padding-bottom: 20px;}
 .margin-bottom { margin-bottom: 20px;}
 .knob-label { font-size: 10pt !important;}
-.devs_table_foot, .network_devs_table_foot { background: #666; color: #fff;}
+.devs_table_foot, .network_devs_table_foot, .gpu_network_devs_table_foot { background: #666; color: #fff;}
 .box.box-gold { border-top-color: #e6cc64;}
 .box.box-dark { border-top-color: #666;}
 .box.box-light { border-top-color: #ddd;}
