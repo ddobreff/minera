@@ -53385,11 +53385,11 @@ function getStats(refresh) {
       //******************//
       if (data.gpu_network_miners) {
         //$('.local-miners-title').show();
-        $('.network-miners-widget-section').show();
-        $('.network-miner-details').show();
+        $('.gpu-network-miners-widget-section').show();
+        $('.gpu-network-miner-details').show();
         var netHashrates = 0, netPoolHashrates = 0, networkMiners = [], tLastShares = [], tAc = 0, tRe = 0, tHw = 0, tSh = 0;
         //console.log(data.gpu_network_miners);
-        if (Object.keys(data.gpu_network_miners).lenggth > 0) {
+        if (Object.keys(data.gpu_network_miners).length > 0) {
           if (!$.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
             // Initialize the miner datatable	
             $('#gpu-network-miner-table-details').dataTable({
