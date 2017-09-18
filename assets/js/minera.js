@@ -2995,8 +2995,6 @@ function getStats(refresh) {
 						});
 					}
 					$.each(data.gpu_network_miners, function (netKey, networkMinerData) {
-						console.log(networkMinerData);
-						console.log(netKey);
 						if (networkMinerData.devices) {
 							networkMiners[netKey] = networkMinerData.devices;
 							// Add per network device stats
