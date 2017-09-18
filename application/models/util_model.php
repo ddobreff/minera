@@ -172,7 +172,9 @@ class Util_model extends CI_Model {
 		
 		$a->network_miners = $this->getNetworkMinerStats(true);
 
-		$a->gpu_network_miners = $this->getGPUNetworkMinerStats(true);
+		$a->gpu_network_miners = $this->getGPUNetworkMinerStatsOld(true);
+
+		$a->gpu_network_miners_test = $this->getGPUNetworkMinerStats(true);
 		
 		// Add Minera ID
 		$a->minera_id = $this->generateMineraId();
@@ -282,6 +284,39 @@ class Util_model extends CI_Model {
 
 		return $a;		
 	}
+
+	public function getGPUNetworkMinerStatsOld($parsed) {
+		$a = array();
+		$netMiners = $this->getGPUNetworkMiners();		
+		if (count($netMiners) > 0)
+		{
+			$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_network_miner');
+			foreach ($netMiners as $netMiner) {
+				$a[$netMiner->name] = new stdClass();				
+				if ($this->checkNetworkDevice($netMiner->ip, $netMiner->port)) 
+				{
+					$n = $this->getGPUMinerStats($netMiner->ip.":".$netMiner->port);
+					if ($parsed === false)
+						$a[$netMiner->name] = $n;
+					else {
+						if ($n) {
+							if (method_exists($this->gpu_network_miner,'getParsedStatsOld')){
+								$a[$netMiner->name] = json_decode($this->gpu_network_miner->getParsedStatsOld($n, true));
+							}
+							else {
+								$a[$netMiner->name] = json_decode($this->getParsedStats($n, true));
+							}
+							$a[$netMiner->name]->pools = $n->pools;
+						}
+					}
+				}
+				// Add config data
+				$a[$netMiner->name]->config = array('ip' => $netMiner->ip, 'port' => $netMiner->port, 'algo' => $netMiner->algo);
+			}
+		}
+
+		return $a;		
+	}	
 	
 	// Get the specific miner stats
 	public function getMinerStats($network = false)

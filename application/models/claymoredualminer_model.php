@@ -176,6 +176,88 @@ class ClaymoreDualminer_model extends CI_Model {
 	public function getParsedStats($stats, $network = false) {
 		$d = 0; $tdevice = array(); $tdtemperature = 0; $tdfrequency = 0; $tdaccepted = 0; $tdrejected = 0; $tdhwerrors = 0; $tdshares = 0; $tdhashrate = 0; $devicePoolActives = false;
 		$return = false;
+		log_message('error',json_encode($stats));
+		if (isset($stats->start_time))
+		{
+			$return['start_time'] = $stats->start_time;
+		}
+		elseif (isset($stats->result[1]))
+		{
+			$return['start_time'] = round((time() - ($stats->result[1] * 60)), 0);
+		}	
+		
+		$poolHashrate = 0;
+		
+		if (isset($stats->result[3])) {
+			
+			$devsHashrates = explode(';',($stats->result[3]));
+
+			for($index = 0; $index < count($devsHashrates); $index++)
+			{
+				$d++; $c = 0; $tcfrequency = 0; $tcaccepted = 0; $tcrejected = 0; $tchwerrors = 0; $tcshares = 0; $tchashrate = 0; $tclastshares = array();
+								
+				$name = 'GPU #'.(int)$index;
+				
+				$return['devices'][$name]['temperature'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[$index * 2] : false;
+				$return['devices'][$name]['fanspeed'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[($index * 2) + 1] : false;			
+				$return['devices'][$name]['frequency'] = false;
+				$return['devices'][$name]['accepted'] = 0;
+				$return['devices'][$name]['rejected'] = 0;
+				$return['devices'][$name]['hw_errors'] = 0;
+			
+				// difficulty
+				$return['devices'][$name]['shares'] = 0;	
+				// hashrate in Mh, convert to h
+				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000);
+				
+				// make it always running due to the last_share checking in app.php
+				$return['devices'][$name]['last_share'] = time();
+				$return['devices'][$name]['serial'] = false;
+
+				$tdtemperature += $return['devices'][$name]['temperature'];					
+				$tdfrequency += $return['devices'][$name]['frequency'];
+				$tdshares += $return['devices'][$name]['shares'];
+				$tdhashrate += $return['devices'][$name]['hashrate'];
+
+			}						
+		}
+
+		if (is_object($stats)) {
+			list($totalHash, $totalAccepted, $totalRejected) = explode(";", $stats->result[2]);
+			list($totalHwerrors) = explode(";", $stats->result[8]);
+			$return['totals']['temperature'] = ($tdtemperature) ? round(($tdtemperature/$d), 2) : false;				
+			$return['totals']['frequency'] = ($tdfrequency) ? round(($tdfrequency/$d), 0) : false;
+			$return['totals']['accepted'] = $totalAccepted;
+			$return['totals']['rejected'] = $totalRejected;
+			$return['totals']['hw_errors'] = $totalHwerrors;
+			$return['totals']['shares'] = $tdshares;
+			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalHash;
+			$return['totals']['last_share'] = time();	
+		}
+
+		if (isset($stats->pools))
+		{
+			$return['pool']['hashrate'] = 0;
+			$return['pool']['url'] = null;
+			$return['pool']['alive'] = 0;
+
+			foreach ($stats->pools as $poolIndex => $pool)
+			{
+
+					if ((isset($pool->active) && $pool->active == 1) || (isset($pool->{'Stratum Active'}) && $pool->{'Stratum Active'} == 1) )
+					{
+						$return['pool']['url'] = $pool->url;
+						$return['pool']['alive'] = $pool->alive;
+					}
+					$return['pool']['hashrate'] = $tdhashrate;
+			}
+		}	
+		return json_encode($return);	
+	}
+
+	public function getParsedStatsOld($stats, $network = false) {
+		$d = 0; $tdevice = array(); $tdtemperature = 0; $tdfrequency = 0; $tdaccepted = 0; $tdrejected = 0; $tdhwerrors = 0; $tdshares = 0; $tdhashrate = 0; $devicePoolActives = false;
+		$return = false;
 
 		if (isset($stats->start_time))
 		{
@@ -183,7 +265,7 @@ class ClaymoreDualminer_model extends CI_Model {
 		}
 		elseif (isset($stats->result[1]))
 		{
-			$return['start_time'] = round((time() - ($stats->result[1] * 60 * 1000)), 0);
+			$return['start_time'] = round((time() - ($stats->result[1] * 60)), 0);
 		}	
 		
 		$poolHashrate = 0;
@@ -203,7 +285,7 @@ class ClaymoreDualminer_model extends CI_Model {
 				$return['devices'][$name]['accepted'] = 0;
 				$return['devices'][$name]['rejected'] = 0;
 				$return['devices'][$name]['hw_errors'] = 0;
-
+				
 				// difficulty
 				$return['devices'][$name]['shares'] = 0;	
 				// hashrate in Mh, convert to h
@@ -250,6 +332,6 @@ class ClaymoreDualminer_model extends CI_Model {
 					$return['pool']['hashrate'] = $tdhashrate;
 			}
 		}	
-		return json_encode($return);	
+		return json_encode($return);		
 	}
 }
