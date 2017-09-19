@@ -200,37 +200,38 @@ class ClaymoreDualminer_model extends CI_Model {
 				
 				$return['devices'][$name]['temperature'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[$index * 2] : false;
 				$return['devices'][$name]['fanspeed'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[($index * 2) + 1] : false;			
-				$return['devices'][$name]['frequency'] = false;
-				$return['devices'][$name]['accepted'] = 0;
-				$return['devices'][$name]['rejected'] = 0;
-				$return['devices'][$name]['hw_errors'] = 0;
+				// $return['devices'][$name]['frequency'] = false;
+				// $return['devices'][$name]['accepted'] = 0;
+				// $return['devices'][$name]['rejected'] = 0;
+				// $return['devices'][$name]['hw_errors'] = 0;
 			
 				// difficulty
-				$return['devices'][$name]['shares'] = 0;	
+				//$return['devices'][$name]['shares'] = 0;	
 				// hashrate in Mh, convert to h
 				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000);
 				
 				// make it always running due to the last_share checking in app.php
-				$return['devices'][$name]['last_share'] = time();
-				$return['devices'][$name]['serial'] = false;
+				//$return['devices'][$name]['last_share'] = time();
+				//$return['devices'][$name]['serial'] = false;
 
 				$tdtemperature += $return['devices'][$name]['temperature'];					
-				$tdfrequency += $return['devices'][$name]['frequency'];
-				$tdshares += $return['devices'][$name]['shares'];
+				//$tdfrequency += $return['devices'][$name]['frequency'];
+				//$tdshares += $return['devices'][$name]['shares'];
 				$tdhashrate += $return['devices'][$name]['hashrate'];
 
 			}						
 		}
-
+		
 		if (is_object($stats)) {
 			list($totalHash, $totalAccepted, $totalRejected) = explode(";", $stats->result[2]);
 			list($totalHwerrors) = explode(";", $stats->result[8]);
+		
 			$return['totals']['temperature'] = ($tdtemperature) ? round(($tdtemperature/$d), 2) : false;				
-			$return['totals']['frequency'] = ($tdfrequency) ? round(($tdfrequency/$d), 0) : false;
+			//$return['totals']['frequency'] = ($tdfrequency) ? round(($tdfrequency/$d), 0) : false;
 			$return['totals']['accepted'] = $totalAccepted;
 			$return['totals']['rejected'] = $totalRejected;
 			$return['totals']['hw_errors'] = $totalHwerrors;
-			$return['totals']['shares'] = $tdshares;
+			//$return['totals']['shares'] = ($tdshares) ? $tdshares : ($totalAccepted + $totalRejected + $totalHwerrors);
 			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalHash;
 			$return['totals']['last_share'] = time();	
 		}
