@@ -172,9 +172,9 @@ class Util_model extends CI_Model {
 		
 		$a->network_miners = $this->getNetworkMinerStats(true);
 
-		$a->gpu_network_miners = $this->getGPUNetworkMinerStatsOld(true);
+		$a->gpu_network_miners_test = $this->getGPUNetworkMinerStatsOld(true);
 
-		$a->gpu_network_miners_test = $this->getGPUNetworkMinerStats(true);
+		$a->gpu_network_miners = $this->getGPUNetworkMinerStats(true);
 		
 		// Add Minera ID
 		$a->minera_id = $this->generateMineraId();

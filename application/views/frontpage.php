@@ -703,7 +703,6 @@
 														  <tr>
 															  <th>DEV</th>
 															  <th>Temp</th>
-															  <th>Frequency</th>
 															  <th>Dev HR</th>
 															  <th>Shares</th>
 															  <th>AC</th>

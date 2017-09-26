@@ -175,6 +175,7 @@ class ClaymoreDualminer_model extends CI_Model {
 	*/
 	public function getParsedStats($stats, $network = false) {
 		$d = 0; $tdevice = array(); $tdtemperature = 0; $tdfrequency = 0; $tdaccepted = 0; $tdrejected = 0; $tdhwerrors = 0; $tdshares = 0; $tdhashrate = 0; $devicePoolActives = false;
+		$tdhashrate_2nd = 0;
 		$return = false;
 		log_message('error',json_encode($stats));
 		if (isset($stats->start_time))
@@ -191,7 +192,7 @@ class ClaymoreDualminer_model extends CI_Model {
 		if (isset($stats->result[3])) {
 			
 			$devsHashrates = explode(';',($stats->result[3]));
-
+			$devsHashrates_2nd = explode(';',($stats->result[4]));
 			for($index = 0; $index < count($devsHashrates); $index++)
 			{
 				$d++; $c = 0; $tcfrequency = 0; $tcaccepted = 0; $tcrejected = 0; $tchwerrors = 0; $tcshares = 0; $tchashrate = 0; $tclastshares = array();
@@ -209,6 +210,7 @@ class ClaymoreDualminer_model extends CI_Model {
 				//$return['devices'][$name]['shares'] = 0;	
 				// hashrate in Mh, convert to h
 				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000);
+				$return['devices'][$name]['hashrate_2nd'] = ($devsHashrates_2nd[$index]*1000);
 				
 				// make it always running due to the last_share checking in app.php
 				//$return['devices'][$name]['last_share'] = time();
@@ -218,30 +220,49 @@ class ClaymoreDualminer_model extends CI_Model {
 				//$tdfrequency += $return['devices'][$name]['frequency'];
 				//$tdshares += $return['devices'][$name]['shares'];
 				$tdhashrate += $return['devices'][$name]['hashrate'];
-
+				$tdhashrate_2nd += $return['devices'][$name]['hashrate_2nd'];
 			}						
 		}
 		
 		if (is_object($stats)) {
 			list($totalHash, $totalAccepted, $totalRejected) = explode(";", $stats->result[2]);
-			list($totalHwerrors) = explode(";", $stats->result[8]);
+			list($totalHash_2nd, $totalAccepted_2nd, $totalRejected_2nd) = explode(";", $stats->result[4]);
+			list($totalHwerrors,,$totalHwerrors_2nd) = explode(";", $stats->result[8]);
 		
 			$return['totals']['temperature'] = ($tdtemperature) ? round(($tdtemperature/$d), 2) : false;				
 			//$return['totals']['frequency'] = ($tdfrequency) ? round(($tdfrequency/$d), 0) : false;
-			$return['totals']['accepted'] = $totalAccepted;
-			$return['totals']['rejected'] = $totalRejected;
-			$return['totals']['hw_errors'] = $totalHwerrors;
+			$return['totals']['accepted'] = intval($totalAccepted);
+			$return['totals']['rejected'] = intval($totalRejected);
+			$return['totals']['hw_errors'] = intval($totalHwerrors);
 			//$return['totals']['shares'] = ($tdshares) ? $tdshares : ($totalAccepted + $totalRejected + $totalHwerrors);
 			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalHash;
+			$return['totals']['shares'] = 0;	
 			$return['totals']['last_share'] = time();	
+			$return['totals']['has_2nd'] = ($tdhashrate_2nd > 0) ? true : false;
+			$return['totals']['hashrate_2nd'] = ($tdhashrate_2nd) ? $tdhashrate_2nd : $totalHash_2nd;
+			$return['totals']['accepted_2nd'] = intval($totalAccepted_2nd);
+			$return['totals']['rejected_2nd'] = intval($totalRejected_2nd);
+			$return['totals']['hw_errors_2nd'] = intval($totalHwerrors_2nd);		
+			
+			list($url_1, $url_2) = explode(';', $stats->result[7]);
+
+			$return['pool']['hashrate'] = $return['totals']['hashrate'];
+			$return['pool']['url'] = $url_1;
+			$return['pool']['alive'] = 1;
+
+			$return['pool']['hashrate_2nd'] = $return['totals']['hashrate_2nd'];
+			$return['pool']['url_2nd'] = $url_2;
+			$return['pool']['alive_2nd'] = ($return['totals']['has_2nd']) ? 1 : 0;
+
 		}
 
+/*		
 		if (isset($stats->pools))
 		{
 			$return['pool']['hashrate'] = 0;
 			$return['pool']['url'] = null;
 			$return['pool']['alive'] = 0;
-
+			
 			foreach ($stats->pools as $poolIndex => $pool)
 			{
 
@@ -253,6 +274,8 @@ class ClaymoreDualminer_model extends CI_Model {
 					$return['pool']['hashrate'] = $tdhashrate;
 			}
 		}	
+*/
+
 		return json_encode($return);	
 	}
 
