@@ -53394,7 +53394,7 @@ function getStats(refresh) {
 				if (Object.keys(data.gpu_network_miners).length > 0) {
 					if (!$.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
 						// Initialize the miner datatable	
-						$('#gpu-network-miner-table-details').dataTable({
+					var table = $('#gpu-network-miner-table-details').DataTable({
 							'lengthMenu': [
 								5,
 								10,
@@ -53406,7 +53406,7 @@ function getStats(refresh) {
 							'bAutoWidth': false,
 							'aoColumnDefs': [
 								{
-									'aTargets': [1],
+									'aTargets': [2],
 									'mRender': function (data, type, full) {
 										if (type === 'display') {
 											if (data)
@@ -53418,20 +53418,21 @@ function getStats(refresh) {
 									}
 								},
 								{
-									'aTargets': [2],
+									'aTargets': [3],
 									'mRender': function (data, type, full) {
-										if (type === 'display') {
+										if (type === 'display') {									
 											var render = '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash) + '</small>';
 											if (data.has_2nd) {
 												render += ' / ' + '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash_2nd) + '</small>';
 											}
 											return render;
+
 										}
 										return data.hash;
 									}
 								},
 								{
-									'aTargets': [10],
+									'aTargets': [11],
 									'mRender': function (data, type, full) {
 										if (type === 'display') {
 											return data + ' secs ago';
@@ -53441,9 +53442,9 @@ function getStats(refresh) {
 								},
 								{
 									'aTargets': [
-										5,
-										7,
-										9
+										6,
+										8,
+										10
 									],
 									'mRender': function (data, type, full) {
 										if (type === 'display') {
@@ -53485,6 +53486,8 @@ function getStats(refresh) {
 								're_2nd': tRe_2nd,
 								'hw_2nd': tHw_2nd
 							};
+
+							networkMiners[netKey].devices = networkMinerData.devices;
 							// Add per device rows in system table
 							var totalData = {};
 							totalData.hash = networkMiners[netKey].hash;
@@ -53513,11 +53516,11 @@ function getStats(refresh) {
 								totalData.label = 'muted';
 							else
 								totalData.label = 'green';
-							
-								console.log(networkMiners[netKey]);
+
 							if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
 								// New add rows via datatable
 								$('#gpu-network-miner-table-details').dataTable().fnAddData([
+									'<span data-key="'+ netKey +'"><i class="fa fa-plus-circle"  aria-hidden="true"></i></span>',
 									'<span><i class="gi gi-server"></i><span class="label label-success" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
 										networkMinerData.config.ip,
 										networkMinerData.config.port
@@ -53534,6 +53537,53 @@ function getStats(refresh) {
 									parseInt(last_share_secs),
 									'<small class="text-muted">' + share_date.toUTCString() + '</small>'
 								]);
+
+								$('#gpu-network-miner-table-details tbody').on( 'click', 'tr td:first',function(){
+									var tr = $(this).closest('tr');
+									var row = table.row( tr );
+									var tdi = tr.find("i.fa");
+									var tds = tr.find('span');
+									var key = tds.first().data('key');
+									var data = networkMiners[key].devices;
+
+									function formatDetail(d) {
+										var thead = $('<tr></tr>');
+										thead.append('<th>GPU #</th>')
+											 .append('<th>Temp</th>')
+											 .append('<th>Fan(%)</th>')
+											 .append('<th>HR 1</th>')
+											 .append('<th>HR 2</th>');
+										var tbody = $('<tbody />');
+										$.each(data, function (key, val) {
+											var tr = $('<tr />');
+											tr.append('<td>' + key +'</td>');
+											tr.append('<td><small class="label bg-blue">' + val.temperature + '&deg;</small></td>');
+											tr.append('<td><small class="badge bg-green">' + val.fanspeed + '%</small>');
+											tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate / 1000) + '</small></td>');
+											tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate_2nd / 1000) + '</small></td>');
+											tr.appendTo(tbody);
+										});										
+										var table = $('<table class="responsive-datatable-minera table table-striped datatable" />');
+										table.append($('<thead />').append(thead)).append(tbody);
+										return table;
+									}									
+
+									if ( row.child.isShown() ) {
+										// This row is already open - close it
+										row.child.hide();
+										tr.removeClass('shown');
+										tdi.first().removeClass('fa-minus-circle');
+										tdi.first().addClass('fa-plus-circle');
+									}
+									else {
+										// Open this row
+										row.child( formatDetail(data) ).show();
+										tr.addClass('shown');
+										tdi.first().removeClass('fa-plus-circle');
+										tdi.first().addClass('fa-minus-circle');										
+									}									
+								});
+								
 							}
 
 							// Add network pools table
@@ -53742,12 +53792,12 @@ function getStats(refresh) {
 						tot_last_share_secs = tot_last_share_date > 0 ? (new Date().getTime() - tot_last_share_date) / 1000 : 0;
 						if (tot_last_share_secs < 0)
 							tot_last_share_secs = 0;
-						netTotalRow = '<tr class="dev-total"><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>' + convertHashrate(netHashrates) + ' / ' + convertHashrate(netHashrates_2nd) + '</strong></td><td class="devs_table_sh">' + networkMiners.total.sh + '</td><td class="devs_table_ac">' + networkMiners.total.ac + ' / ' + networkMiners.total.ac_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageAc).toFixed(2) + ' / ' + parseFloat(tPercentageAc_2nd).toFixed(2) + '%</small></td><td class="devs_table_re">' + networkMiners.total.re + ' / ' + networkMiners.total.re_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageRe).toFixed(2) + ' / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '%</small></td><td class="devs_table_hw">' + networkMiners.total.hw + ' / ' + networkMiners.total.hw_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageHw).toFixed(2) + ' / ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '%</small></td><td class="devs_table_ls">' + parseInt(tot_last_share_secs) + ' secs ago</td><td><small class="text-muted">' + new Date(tot_last_share_date).toUTCString() + '</small></td></tr>';
+						netTotalRow = '<tr class="dev-total"><td class="devs_details"></td><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>' + convertHashrate(netHashrates) + ' / ' + convertHashrate(netHashrates_2nd) + '</strong></td><td class="devs_table_sh">' + networkMiners.total.sh + '</td><td class="devs_table_ac">' + networkMiners.total.ac + ' / ' + networkMiners.total.ac_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageAc).toFixed(2) + ' / ' + parseFloat(tPercentageAc_2nd).toFixed(2) + '%</small></td><td class="devs_table_re">' + networkMiners.total.re + ' / ' + networkMiners.total.re_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageRe).toFixed(2) + ' / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '%</small></td><td class="devs_table_hw">' + networkMiners.total.hw + ' / ' + networkMiners.total.hw_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageHw).toFixed(2) + ' / ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '%</small></td><td class="devs_table_ls">' + parseInt(tot_last_share_secs) + ' secs ago</td><td><small class="text-muted">' + new Date(tot_last_share_date).toUTCString() + '</small></td></tr>';
 						// Network Widgets
 						$('.gpu-network-widget-last-share').html(parseInt(tot_last_share_secs) + ' secs');
 						$('.gpu-network-widget-hwre-rates').html(parseFloat(tPercentageHw).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe).toFixed(2) + '<sup style="font-size: 20px">%</sup>' + ' | ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '<sup style="font-size: 20px">%</sup>');
 					} else {
-						netTotalRow = '<tr class="dev-total"><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>-</strong></td><td class="devs_table_sh">-</td><td class="devs_table_ac">-</td><td><small class="text-muted">-</small></td><td class="devs_table_re">-</td><td><small class="text-muted">-</small></td><td class="devs_table_hw">-</td><td><small class="text-muted">-</small></td><td class="devs_table_ls">-</td><td><small class="text-muted">-</small></td></tr>';
+						netTotalRow = '<tr class="dev-total"><td class="devs_details"></td><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>-</strong></td><td class="devs_table_sh">-</td><td class="devs_table_ac">-</td><td><small class="text-muted">-</small></td><td class="devs_table_re">-</td><td><small class="text-muted">-</small></td><td class="devs_table_hw">-</td><td><small class="text-muted">-</small></td><td class="devs_table_ls">-</td><td><small class="text-muted">-</small></td></tr>';
 						// Network Widgets
 						$('.gpu-network-widget-last-share').html('&infin; secs');
 						$('.gpu-network-widget-hwre-rates').html('Not available');
@@ -53765,7 +53815,7 @@ function getStats(refresh) {
 					$('.gpu-network-miners-widget-section').hide();
 				}
 			}
-			// End gpu network miner details  			
+			// End gpu network miner details   			
 
       // Add controller temperature
       if (data.temp) {

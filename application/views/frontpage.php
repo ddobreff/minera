@@ -701,6 +701,7 @@
 													  <table id="gpu-network-miner-table-details" class="responsive-datatable-minera table table-striped datatable">
 														  <thead>
 														  <tr>
+														  	  <th></th>
 															  <th>DEV</th>
 															  <th>Temp</th>
 															  <th>Dev HR</th>
