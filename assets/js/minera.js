@@ -36,7 +36,7 @@ function convertHashrate(hash) {
 	else if (hash > 900)
 		return (hash / 1000).toFixed(2) + 'Mh/s';
 	else
-		return hash.toFixed(0) + 'Kh/s';
+		return hash.toFixed(3) + 'Kh/s';
 }
 
 function convertMS(ms) {
@@ -2795,7 +2795,7 @@ function getStats(refresh) {
 
 											// Calculate the real pool hashrate
 											if (pval.active === true || pval.active === 1) {
-												phashData.hash = parseInt(netpoolhashrate / 1000); //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
+												phashData.hash = parseFloat(netpoolhashrate / 1000.0); //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
 												phashData.label = 'red';
 												netPoolHashrates += phashData.hash;
 											}
@@ -3203,8 +3203,8 @@ function getStats(refresh) {
 											prejected = pstats.rejected;
 											// Calculate the real pool hashrate
 											if (pval.active === true || pval.active === 1) {
-												phashData.hash = parseInt(netpoolhashrate / 1000); //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
-												phashData.hash_2nd = parseInt(netpoolhashrate_2nd / 1000);
+												phashData.hash = parseFloat(netpoolhashrate / 1000.0); //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
+												phashData.hash_2nd = parseFloat(netpoolhashrate_2nd / 1000.0);
 												phashData.label = 'red';
 												netPoolHashrates += phashData.hash;
 												netPoolHashrates_2nd += phashData.hash_2nd;
@@ -3318,8 +3318,8 @@ function getStats(refresh) {
 								tr.append('<td>' + key +'</td>');
 								tr.append('<td><small class="label bg-blue">' + val.temperature + '&deg;</small></td>');
 								tr.append('<td><small class="badge bg-green">' + val.fanspeed + '%</small>');
-								tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate / 1000) + '</small></td>');
-								tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate_2nd / 1000) + '</small></td>');
+								tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate / 1000.0) + '</small></td>');
+								tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate_2nd / 1000.0) + '</small></td>');
 								tr.append(action_td);
 								tr.appendTo(tbody);
 							});										

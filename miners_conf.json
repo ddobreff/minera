@@ -139,7 +139,13 @@
 {
     "miner": "claymorezecminer",
     "miner_name": "ClaymoreZecMiner",
-    "miner_device": "Claymore Zec Miner",
+    "miner_device": "Claymore Zec Miner (AMD)",
+    "miner_options": ""
+},
+{
+    "miner": "ewbfminer",
+    "miner_name": "EwbfMiner",
+    "miner_device": "Ewbf Miner (NVidia)",
     "miner_options": ""
 },
 {

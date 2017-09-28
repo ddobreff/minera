@@ -1015,7 +1015,8 @@
 											<label>Prefer GPU Miner Software</label>
 											<select class="form-control gpu_net_miner_software" name="gpu_net_miner_software">
 												<option value="claymoredualminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymoredualminer") echo "selected" ?>>Claymore Dual Miner</option>
-												<option value="claymorezecminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymorezecminer") echo "selected" ?>>Claymore Zec Miner</option>
+												<option value="claymorezecminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymorezecminer") echo "selected" ?>>Claymore Zec Miner (AMD)</option>
+												<option value="ewbfminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "ewbfminer") echo "selected" ?>>EWBF Miner (NVidia)</option>
 												<option value="claymorexmrminer" <?php if (isset($gpuNetMinersSoftware) && $gpuNetMinersSoftware === "claymorexmrminer") echo "selected" ?>>Claymore Xmr Miner</option>															
 											</select>										
 										</div>

@@ -261,8 +261,14 @@ class Util_model extends CI_Model {
 		{
 			$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_network_miner');
 			foreach ($netMiners as $netMiner) {
-				$a[$netMiner->name] = new stdClass();				
-				if ($this->checkNetworkDevice($netMiner->ip, $netMiner->port)) 
+				$a[$netMiner->name] = new stdClass();	
+				$is_online = false;
+				if(method_exists($this->gpu_network_miner,'checkNetworkDevice')) {
+					$is_online = $this->gpu_network_miner->checkNetworkDevice($netMiner->ip, $netMiner->port);
+				} else {
+					$is_online = $this->checkNetworkDevice($netMiner->ip, $netMiner->port);
+				}
+				if ($is_online) 
 				{
 					$n = $this->getGPUMinerStats($netMiner->ip.":".$netMiner->port);
 					if ($parsed === false)
@@ -432,13 +438,21 @@ class Util_model extends CI_Model {
 	{
 		$tmpPools = null; $pools = array();
 		
-		if ($this->isOnline($network))
+		$is_online = false;
+
+		if(method_exists($this->gpu_network_miner,'isOnline')) {
+			$is_online = $this->gpu_network_miner->isOnline($network);
+		} else {
+			$is_online = $this->isOnline($network);
+		}		
+
+		if ($is_online)
 		{
 			$a = ($network) ? $this->gpu_network_miner->callMinerd(false, $network) : $this->miner->callMinerd();
 
 			if (is_object($a))
 			{
-				//if ($this->_gpuMinerdSoftware == "claymoredualminer" || $this->_gpuMinerdSoftware == "claymorezecminer" || $this->_gpuMinerdSoftware == "claymorexmrminer") {
+				if ($this->_gpuMinerdSoftware == "claymoredualminer" || $this->_gpuMinerdSoftware == "claymorezecminer" || $this->_gpuMinerdSoftware == "claymorexmrminer") {
 					list(,$accepted, $rejected) = explode(';', $a->result[2]);
 
 					$stats = new stdClass();
@@ -466,7 +480,32 @@ class Util_model extends CI_Model {
 					unset($hashResult);
 					unset($newpool);
 					unset($stats);
-				//}
+				}
+				else if ($this->_gpuMinerdSoftware == "ewbfminer") {
+					$stats = new stdClass();
+					$stats->start_time = false;
+					$stats->accepted = 0;
+					$stats->rejected = 0;
+					$stats->shares = false;
+					$stats->stop_time = false;
+					$stats->stats_id = 1;
+
+					$newpool = new stdClass();
+					$newpool->priority = false;
+					$newpool->url = $a->current_server;
+					$newpool->active = true;
+					$newpool->user = false;
+					$newpool->pass = false;
+					$newpool->stats = array($stats);
+					$newpool->stats_id = 1;
+					$newpool->alive = 1;
+					
+					$pools[] = $newpool;
+					
+					unset($hashResult);
+					unset($newpool);
+					unset($stats);
+				}
 
 				$a->original_pools = $tmpPools;
 				$a->pools = $pools;
