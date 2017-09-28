@@ -131,15 +131,30 @@ class ClaymoreDualminer_model extends CI_Model {
 		
 		return array("error" => true, "msg" => "Miner error");
 	}
-    
+	
+	public function restartMiner($network = false) {
+		$networkDesc = ($network) ? $network : '127.0.0.1';
+		log_message("error", "Trying to restart miner. -- ". $networkDesc);
+		$o = $this->callMinerd('{"id":0,"jsonrpc":"2.0","method":"miner_restart"}', $network);
+		log_message("error", var_export($o, true));
+	}
+
+	public function rebootMiner($network = false) {
+		$networkDesc = ($network) ? $network : '127.0.0.1';
+		log_message("error", "Trying to reboot miner. -- ". $networkDesc);
+		$o = $this->callMinerd('{"id":0,"jsonrpc":"2.0","method":"miner_reboot"}', $network);
+		log_message("error", var_export($o, true));
+	}	
+
     /*
         GPU index, or "-1" for all GPUs
         State, 0 - disabled, 1 - ETH-only mode, 2 - dual mode.
     */
-	public function ControlGPU($gpuIndex, $state)
+	public function ControlGPU($gpuIndex, $state, $network = false)
 	{
         $stateDesc = "Disabled";
-        $gpuDesc = "All GPU";
+		$gpuDesc = "All GPU";
+		$networkDesc = ($network) ? $network : '127.0.0.1';
 
         if ($state==1) {
             $stateDesc = "ETH-only mode";  
@@ -152,7 +167,7 @@ class ClaymoreDualminer_model extends CI_Model {
             $gpuDesc = "GPU #".(int)$gpuIndex;
         }
 
-		log_message("error", "Trying to control gpu. ".$gpuDesc." (".$stateDesc.")");
+		log_message("error",  "Trying to control gpu. ".$gpuDesc." (".$stateDesc.") -- ".$networkDesc);
 		$o = $this->callMinerd('{"id":0,"jsonrpc":"2.0","method":"control_gpu", "params":['.$gpuIndex.','.$state.']}', $network);
 		log_message("error", var_export($o, true));
 		return $o;
@@ -177,7 +192,7 @@ class ClaymoreDualminer_model extends CI_Model {
 		$d = 0; $tdevice = array(); $tdtemperature = 0; $tdfrequency = 0; $tdaccepted = 0; $tdrejected = 0; $tdhwerrors = 0; $tdshares = 0; $tdhashrate = 0; $devicePoolActives = false;
 		$tdhashrate_2nd = 0;
 		$return = false;
-		log_message('error',json_encode($stats));
+
 		if (isset($stats->start_time))
 		{
 			$return['start_time'] = $stats->start_time;
@@ -205,9 +220,12 @@ class ClaymoreDualminer_model extends CI_Model {
 				// difficulty
 				//$return['devices'][$name]['shares'] = 0;	
 				// hashrate in Mh, convert to h
-				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000);
-				$return['devices'][$name]['hashrate_2nd'] = ($devsHashrates_2nd[$index]*1000);
+				$chashrate = ($devsHashrates[$index]=='off') ? 0 : $devsHashrates[$index];
+				$chashrate_2nd = ($devsHashrates_2nd[$index]=='off') ? 0 : $devsHashrates_2nd[$index];
+				$return['devices'][$name]['hashrate'] = ($chashrate*1000);
+				$return['devices'][$name]['hashrate_2nd'] = ($chashrate_2nd*1000);
 				
+				$return['devices'][$name]['disabled'] = ($chashrate != 0) ? false : true;
 
 				$tdtemperature += $return['devices'][$name]['temperature'];					
 				//$tdshares += $return['devices'][$name]['shares'];
@@ -226,14 +244,23 @@ class ClaymoreDualminer_model extends CI_Model {
 			$return['totals']['rejected'] = intval($totalRejected);
 			$return['totals']['hw_errors'] = intval($totalHwerrors);
 			//$return['totals']['shares'] = ($tdshares) ? $tdshares : ($totalAccepted + $totalRejected + $totalHwerrors);
-			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalHash;
+			$return['totals']['hashrate'] = intval(($tdhashrate) ? $tdhashrate : $totalHash);
 			$return['totals']['shares'] = 0;	
 			$return['totals']['last_share'] = time();	
 			$return['totals']['has_2nd'] = ($tdhashrate_2nd > 0) ? true : false;
-			$return['totals']['hashrate_2nd'] = ($tdhashrate_2nd) ? $tdhashrate_2nd : $totalHash_2nd;
+			$return['totals']['hashrate_2nd'] = intval(($tdhashrate_2nd) ? $tdhashrate_2nd : $totalHash_2nd);
 			$return['totals']['accepted_2nd'] = intval($totalAccepted_2nd);
 			$return['totals']['rejected_2nd'] = intval($totalRejected_2nd);
 			$return['totals']['hw_errors_2nd'] = intval($totalHwerrors_2nd);		
+
+			$features['has_dualmine'] = true;
+			$features['is_dualmine'] = $return['totals']['has_2nd'];
+			$features['restart'] = true;
+			$features['reboot'] = true;
+			$features['controlGPU'] = false; //temporary disable due to api not working
+			
+			$return['features'] = $features;		
+			
 			
 			list($url_1, $url_2) = explode(';', $stats->result[7]);
 

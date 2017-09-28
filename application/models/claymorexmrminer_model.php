@@ -133,17 +133,32 @@ class ClaymoreXmrminer_model extends CI_Model {
 		return array("error" => true, "msg" => "Miner error");
 	}
     
+	public function restartMiner($network = false) {
+		$networkDesc = ($network) ? $network : '127.0.0.1';
+		log_message("error", "Trying to restart miner. -- ". $networkDesc);
+		$o = $this->callMinerd('{"id":0,"jsonrpc":"2.0","method":"miner_restart"}', $network);
+		log_message("error", var_export($o, true));
+	}
+
+	public function rebootMiner($network = false) {
+		$networkDesc = ($network) ? $network : '127.0.0.1';
+		log_message("error", "Trying to reboot miner. -- ". $networkDesc);
+		$o = $this->callMinerd('{"id":0,"jsonrpc":"2.0","method":"miner_reboot"}', $network);
+		log_message("error", var_export($o, true));
+	}	
+
     /*
         GPU index, or "-1" for all GPUs
         State, 0 - disabled, 1 - ETH-only mode, 2 - dual mode.
     */
-	public function ControlGPU($gpuIndex, $state)
+	public function ControlGPU($gpuIndex, $state, $network = false)
 	{
         $stateDesc = "Disabled";
-        $gpuDesc = "All GPU";
+		$gpuDesc = "All GPU";
+		$networkDesc = ($network) ? $network : '127.0.0.1';
 
         if ($state==1) {
-            $stateDesc = "Monero mode";  
+            $stateDesc = "ETH-only mode";  
         }
         else if ($state==2) {
             $stateDesc = "Dual mode";  
@@ -153,11 +168,12 @@ class ClaymoreXmrminer_model extends CI_Model {
             $gpuDesc = "GPU #".(int)$gpuIndex;
         }
 
-		log_message("error", "Trying to control gpu. ".$gpuDesc." (".$stateDesc.")");
+		log_message("error",  "Trying to control gpu. ".$gpuDesc." (".$stateDesc.") -- ".$networkDesc);
 		$o = $this->callMinerd('{"id":0,"jsonrpc":"2.0","method":"control_gpu", "params":['.$gpuIndex.','.$state.']}', $network);
 		log_message("error", var_export($o, true));
 		return $o;
 	}
+
 
 	/*
 	RESPONSE: result[0-8]
@@ -175,6 +191,7 @@ class ClaymoreXmrminer_model extends CI_Model {
 	*/
 	public function getParsedStats($stats, $network = false) {
 		$d = 0; $tdevice = array(); $tdtemperature = 0; $tdfrequency = 0; $tdaccepted = 0; $tdrejected = 0; $tdhwerrors = 0; $tdshares = 0; $tdhashrate = 0; $devicePoolActives = false;
+		$tdhashrate_2nd = 0;
 		$return = false;
 
 		if (isset($stats->start_time))
@@ -183,7 +200,7 @@ class ClaymoreXmrminer_model extends CI_Model {
 		}
 		elseif (isset($stats->result[1]))
 		{
-			$return['start_time'] = round((time() - ($stats->result[1] * 60 * 1000)), 0);
+			$return['start_time'] = round((time() - ($stats->result[1] * 60)), 0);
 		}	
 		
 		$poolHashrate = 0;
@@ -191,65 +208,72 @@ class ClaymoreXmrminer_model extends CI_Model {
 		if (isset($stats->result[3])) {
 			
 			$devsHashrates = explode(';',($stats->result[3]));
-
+			$devsHashrates_2nd = explode(';',($stats->result[4]));
 			for($index = 0; $index < count($devsHashrates); $index++)
 			{
 				$d++; $c = 0; $tcfrequency = 0; $tcaccepted = 0; $tcrejected = 0; $tchwerrors = 0; $tcshares = 0; $tchashrate = 0; $tclastshares = array();
 								
 				$name = 'GPU #'.(int)$index;
-				
+				$return['devices'][$name]['index'] = $index;
 				$return['devices'][$name]['temperature'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[$index * 2] : false;
-				$return['devices'][$name]['frequency'] = false;
-				$return['devices'][$name]['accepted'] = 0;
-				$return['devices'][$name]['rejected'] = 0;
-				$return['devices'][$name]['hw_errors'] = 0;
-
+				$return['devices'][$name]['fanspeed'] = (isset($stats->result[6])) ? explode(';',($stats->result[6]))[($index * 2) + 1] : false;			
+			
 				// difficulty
-				$return['devices'][$name]['shares'] = 0;	
+				//$return['devices'][$name]['shares'] = 0;	
 				// hashrate in Mh, convert to h
-				$return['devices'][$name]['hashrate'] = ($devsHashrates[$index]*1000);
+				$chashrate = ($devsHashrates[$index]=='off') ? 0 : $devsHashrates[$index];
+				$chashrate_2nd = ($devsHashrates_2nd[$index]=='off') ? 0 : $devsHashrates_2nd[$index];
+				$return['devices'][$name]['hashrate'] = ($chashrate*1000);
+				$return['devices'][$name]['hashrate_2nd'] = ($chashrate_2nd*1000);
 				
-				// make it always running due to the last_share checking in app.php
-				$return['devices'][$name]['last_share'] = time();
-				$return['devices'][$name]['serial'] = false;
+				$return['devices'][$name]['disabled'] = ($chashrate != 0) ? false : true;
 
 				$tdtemperature += $return['devices'][$name]['temperature'];					
-				$tdfrequency += $return['devices'][$name]['frequency'];
-				$tdshares += $return['devices'][$name]['shares'];
+				//$tdshares += $return['devices'][$name]['shares'];
 				$tdhashrate += $return['devices'][$name]['hashrate'];
-
+				$tdhashrate_2nd += $return['devices'][$name]['hashrate_2nd'];
 			}						
 		}
-
+		
 		if (is_object($stats)) {
 			list($totalHash, $totalAccepted, $totalRejected) = explode(";", $stats->result[2]);
+			list($totalHash_2nd, $totalAccepted_2nd, $totalRejected_2nd) = explode(";", $stats->result[4]);
+			list($totalHwerrors,,$totalHwerrors_2nd) = explode(";", $stats->result[8]);
+		
 			$return['totals']['temperature'] = ($tdtemperature) ? round(($tdtemperature/$d), 2) : false;				
-			$return['totals']['frequency'] = ($tdfrequency) ? round(($tdfrequency/$d), 0) : false;
-			$return['totals']['accepted'] = $totalAccepted;
-			$return['totals']['rejected'] = $totalRejected;
-			$return['totals']['hw_errors'] = 0;
-			$return['totals']['shares'] = $tdshares;
-			$return['totals']['hashrate'] = ($tdhashrate) ? $tdhashrate : $totalHash;
+			$return['totals']['accepted'] = intval($totalAccepted);
+			$return['totals']['rejected'] = intval($totalRejected);
+			$return['totals']['hw_errors'] = intval($totalHwerrors);
+			//$return['totals']['shares'] = ($tdshares) ? $tdshares : ($totalAccepted + $totalRejected + $totalHwerrors);
+			$return['totals']['hashrate'] = intval(($tdhashrate) ? $tdhashrate : $totalHash);
+			$return['totals']['shares'] = 0;	
 			$return['totals']['last_share'] = time();	
+			$return['totals']['has_2nd'] = ($tdhashrate_2nd > 0) ? true : false;
+			$return['totals']['hashrate_2nd'] = intval(($tdhashrate_2nd) ? $tdhashrate_2nd : $totalHash_2nd);
+			$return['totals']['accepted_2nd'] = intval($totalAccepted_2nd);
+			$return['totals']['rejected_2nd'] = intval($totalRejected_2nd);
+			$return['totals']['hw_errors_2nd'] = intval($totalHwerrors_2nd);		
+
+			$features['has_dualmine'] = false;
+			$features['is_dualmine'] = false;
+			$features['restart'] = true;
+			$features['reboot'] = true;
+			$features['controlGPU'] = false; //temporary disable due to api not working
+			
+			$return['features'] = $features;		
+			
+			
+			list($url_1, $url_2) = explode(';', $stats->result[7]);
+
+			$return['pool']['hashrate'] = $return['totals']['hashrate'];
+			$return['pool']['url'] = $url_1;
+			$return['pool']['alive'] = 1;
+
+			$return['pool']['hashrate_2nd'] = $return['totals']['hashrate_2nd'];
+			$return['pool']['url_2nd'] = $url_2;
+			$return['pool']['alive_2nd'] = ($return['totals']['has_2nd']) ? 1 : 0;
+
 		}
-
-		if (isset($stats->pools))
-		{
-			$return['pool']['hashrate'] = 0;
-			$return['pool']['url'] = null;
-			$return['pool']['alive'] = 0;
-
-			foreach ($stats->pools as $poolIndex => $pool)
-			{
-
-					if ((isset($pool->active) && $pool->active == 1) || (isset($pool->{'Stratum Active'}) && $pool->{'Stratum Active'} == 1) )
-					{
-						$return['pool']['url'] = $pool->url;
-						$return['pool']['alive'] = $pool->alive;
-					}
-					$return['pool']['hashrate'] = $tdhashrate;
-			}
-		}	
 		return json_encode($return);	
 	}
 

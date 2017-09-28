@@ -114,13 +114,17 @@ class Util_model extends CI_Model {
 		return true;
 	}
 
-	public function switchGPUMinerSoftware($software=false){
+	public function switchGPUMinerSoftware($software=false, $network = false){
 		if ($software)
 			$this->_gpuMinerdSoftware = $software;
 		else
 			$this->_gpuMinerdSoftware = $this->redis->get('gpu_network_miners_software');
 
-		$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_network_miner');
+		$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_miner');
+
+		if ($network) {
+			$this->load->model($this->_gpuMinerdSoftware.'_model', 'gpu_network_miner');
+		}	
 		return true;		
 	}
 	
@@ -1842,6 +1846,30 @@ class Util_model extends CI_Model {
 					
 		return $this->miner->removePool($poolId, $network);
 	}
+
+	public function restartGPUMiner($network = false) {
+		if ($network) {
+			$this->switchGPUMinerSoftware(false,$network);
+			return $this->gpu_network_miner->restartMiner($network);
+		}
+		return $this->gpu_miner->restartMiner();
+	}
+
+	public function rebootGPUMiner($network = false) {
+		if ($network) {
+			$this->switchGPUMinerSoftware(false,$network);
+			return $this->gpu_network_miner->rebootMiner($network);
+		}
+		return $this->gpu_miner->rebootMiner();
+	}	
+
+	public function controlGPU($gpu, $state, $network = false) {
+		if ($network) {
+			$this->switchGPUMinerSoftware(false,$network);
+			return $this->gpu_network_miner->ControlGPU($gpu,$state,$network);
+		}
+		return $this->gpu_miner->ControlGPU($gpu,$state);
+	}		
 			
 	// Stop miner
 	public function minerStop()

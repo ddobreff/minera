@@ -702,6 +702,7 @@
 														  <thead>
 														  <tr>
 														  	  <th></th>
+														  	  <th></th>																
 															  <th>DEV</th>
 															  <th>Temp</th>
 															  <th>Dev HR</th>

@@ -1063,7 +1063,7 @@ class App extends Main_Controller {
 				$o = json_encode($this->util_model->getNetworkMinerStats(false));
 			break;
 			case "gpu_network_miners_stats":
-			$o = json_encode($this->util_model->getGPUNetworkMinerStats(false));
+				$o = json_encode($this->util_model->getGPUNetworkMinerStats(false));
 			break;	
 			case "notify_mobileminer":
 				$o = $this->util_model->callMobileminer();
@@ -1107,7 +1107,7 @@ class App extends Main_Controller {
 				$o = json_encode($this->util_model->discoveryNetworkDevices());
 			break;
 			case "scan_gpu_network":
-			$o = json_encode($this->util_model->discoveryGPUNetworkDevices());
+				$o = json_encode($this->util_model->discoveryGPUNetworkDevices());
 			break;		
 			case "tail_log":
 				$o = json_encode($this->util_model->tailFile($this->input->get('file'), ($this->input->get('lines')) ? $this->input->get('lines') : 5));
@@ -1140,6 +1140,21 @@ class App extends Main_Controller {
 				//$o = $this->redis->command("BGSAVE"); //$this->util_model->checkCronIsRunning(); //$this->util_model->sendAnonymousStats(123, "hello world!");
 				$o = $this->util_model->checkAdsFree(); //$this->util_model->updateAltcoinsRates(); //$this->util_model->refreshMinerConf(); //$o = json_encode($this->util_model->callMinerd()); //$this->util_model->getParsedStats($this->util_model->getMinerStats());
 			break;
+			case "restart_gpu_miner":
+				$o = json_encode($this->util_model->restartGPUMiner($this->input->post('network')));
+				// Give the miner the time to refresh
+				sleep(3);				
+			break;
+			case "reboot_gpu_miner":
+				$o = json_encode($this->util_model->rebootGPUMiner($this->input->post('network')));
+				// Give the miner the time to refresh
+				sleep(3);				
+			break;	
+			case "control_gpu":
+				$o = json_encode($this->util_model->controlGPU($this->input->post('gpu'),$this->input->post('state'),$this->input->post('network')));
+				// Give the miner the time to refresh
+				sleep(3);				
+			break;						
 		}
 
 		$this->output
