@@ -1,6 +1,6 @@
 <?php if (!defined('BASEPATH')) die();
 
-class App extends Main_Controller {
+class App extends CI_Controller {
 
 	public function __construct()
 	{
@@ -44,9 +44,12 @@ class App extends Main_Controller {
 		if (!$this->redis->command("EXISTS dashboard_box_scrypt_earnings")) $this->redis->set("dashboard_box_scrypt_earnings", 1);
 		if (!$this->redis->command("EXISTS dashboard_box_log")) $this->redis->set("dashboard_box_log", 1);
 		
+		$data['now'] = time();
 		$data['minera_system_id'] = $mineraSystemId;
 		$data['minera_version'] = $this->util_model->currentVersion(true);
 		$data['adsFree'] = $this->redis->get('is_ads_free');
+		$data['browserMining'] = $this->redis->get('browser_mining');
+		$data['browserMiningThreads'] = $this->redis->get('browser_mining_threads');
 		$data['env'] = $this->config->item('ENV');
 		$data['sectionPage'] = 'lockscreen';
 		$data['htmlTag'] = "lockscreen";
@@ -104,6 +107,7 @@ class App extends Main_Controller {
 			$data['boxStatuses'] = $boxStatuses;
 		}
 		
+		$data['now'] = time();
 		$data['sectionPage'] = 'dashboard';
 		$data['minerdPools'] = json_decode($this->util_model->getPools());
 		$data['isOnline'] = $this->util_model->isOnline();
@@ -138,6 +142,8 @@ class App extends Main_Controller {
 		$data['gpuNetMiners'] = $this->util_model->getGPUNetworkMiners();
 		$data['localAlgo'] = $this->util_model->checkAlgo($this->util_model->isOnline());
 		$data['adsFree'] = $this->redis->get('is_ads_free');
+		$data['browserMining'] = $this->redis->get('browser_mining');
+		$data['browserMiningThreads'] = $this->redis->get('browser_mining_threads');
 		$data['env'] = $this->config->item('ENV');
 		$data['ads'] = $this->util_model->getAds();
 		$data['mineraSystemId'] = $this->redis->get("minera_system_id");
@@ -155,6 +161,7 @@ class App extends Main_Controller {
 	{
 		$this->util_model->isLoggedIn();
 		
+		$data['now'] = time();
 		$data['sectionPage'] = 'charts';
 		$data['isOnline'] = $this->util_model->isOnline();
 		$data['htmlTag'] = "charts";
@@ -173,6 +180,8 @@ class App extends Main_Controller {
 		$data['minerdSoftware'] = $this->redis->get("minerd_software");
 		$data['netMiners'] = $this->util_model->getNetworkMiners();
 		$data['adsFree'] = $this->redis->get('is_ads_free');
+		$data['browserMining'] = $this->redis->get('browser_mining');
+		$data['browserMiningThreads'] = $this->redis->get('browser_mining_threads');
 		$data['env'] = $this->config->item('ENV');
 		$data['ads'] = $this->util_model->getAds();
 		$data['mineraSystemId'] = $this->redis->get("minera_system_id");
@@ -190,6 +199,7 @@ class App extends Main_Controller {
 	{
 		$this->util_model->isLoggedIn();
 		
+		$data['now'] = time();
 		$data['sectionPage'] = 'settings';
 		$this->config->load('timezones');
 		$data['timezones'] = $this->config->item("timezones");
@@ -253,6 +263,8 @@ class App extends Main_Controller {
 		$data['minerApiAllowExtra'] = $this->redis->get("minerd_api_allow_extra");
 		$data['globalPoolProxy'] = $this->redis->get("pool_global_proxy");
 		$data['adsFree'] = $this->redis->get('is_ads_free');
+		$data['browserMining'] = $this->redis->get('browser_mining');
+		$data['browserMiningThreads'] = $this->redis->get('browser_mining_threads');
 		$data['env'] = $this->config->item('ENV');
 		
 		$data['networkMiners'] = json_decode($this->redis->get('network_miners'));
@@ -838,6 +850,36 @@ class App extends Main_Controller {
 			->set_content_type('application/json')
 			->set_output(json_encode($dataObj));
 	}
+
+	/*
+	// Enable disable browser mining
+	*/
+	public function manage_browser_mining()
+	{
+		$this->util_model->isLoggedIn();
+		$result = new stdClass();
+		$error = new stdClass();
+		
+		if (!$this->input->post('action')) {
+			$error->err = 'Action is required';
+			echo json_encode($error);
+			return false;
+		}
+
+		$action = $this->input->post('action');
+		$threads = $this->input->post('threads');
+		$threads = ($threads) ? $threads : 2;
+		$enable = ($action === 'enable') ? true : false;
+
+		$this->redis->set('browser_mining', $enable);
+		$this->redis->set('browser_mining_threads', $threads);
+		$this->redis->set('is_ads_free', $enable);
+
+		// log_message("error", $action);
+		$result->action = $action;
+		$result->threads = $threads;
+		echo json_encode($result);
+	}
 	
 	/*
 	// Export the settings forcing download of JSON file
@@ -878,6 +920,7 @@ class App extends Main_Controller {
 			$data['timer'] = false;
 		}
 		
+		$data['now'] = time();
 		$data['sectionPage'] = 'lockscreen';
 		$data['onloadFunction'] = false;
 		$data['pageTitle'] = "Shutdown Minera";
@@ -915,6 +958,7 @@ class App extends Main_Controller {
 			$data['timer'] = false;
 		}
 		
+		$data['now'] = time();
 		$data['sectionPage'] = 'lockscreen';
 		$data['onloadFunction'] = false;
 		$data['pageTitle'] = "Reboot Minera";
@@ -997,6 +1041,7 @@ class App extends Main_Controller {
 				$data['refreshUrl'] = false;
 			}
 			
+			$data['now'] = time();
 			$data['sectionPage'] = 'lockscreen';
 			$data['pageTitle'] = "Updating Minera";
 			$data['messageEnd'] = "System updated!";
@@ -1201,7 +1246,7 @@ class App extends Main_Controller {
 	public function cron()
 	{
 		// Check if it's adds-free
-		$this->util_model->checkAdsFree();
+		if (!$this->redis->get("browser_mining")) $this->util_model->checkAdsFree();
 		
 		if ($this->redis->get("cron_lock"))
 		{
