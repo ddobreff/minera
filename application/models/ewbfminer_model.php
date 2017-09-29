@@ -67,14 +67,13 @@ class Ewbfminer_model extends CI_Model {
 
 		if ($network) list($ip, $port) = explode(":", $network);
 		
-		$host = 'http://'.$ip.':'.$port;
+		$host = 'http://'.$ip.':'.$port.'/'.$parse->method;
 		
 		//PULL IN EWBF DATA
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $host);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $cmd);
 
 		$result = curl_exec($ch);
 		if (curl_errno($ch)) {
@@ -82,18 +81,7 @@ class Ewbfminer_model extends CI_Model {
 			return array("error" => true, "msg" => "Miner error");
 		}
 		curl_close ($ch);	
-		return json_decode($result,TRUE);		
-/*   		
-        $host = 'http://'.$ip.':'.$port.'/'.$parse->method;
-        $ctx = stream_context_create(array('http' => array('timeout' => 10)));
-        $result = @file_get_contents($host, 0, $ctx);
-
-        if ($result !=null) {
-            return json_decode($result);
-        }
-
-		return array("error" => true, "msg" => "Miner error");
-*/
+		return json_decode($result);		
     }
 
     function isOnline($network) {
@@ -175,7 +163,7 @@ class Ewbfminer_model extends CI_Model {
                 $name = 'GPU #'.(int)$device->gpuid;
 				$return['devices'][$name]['index'] = $device->gpuid;
 				$return['devices'][$name]['temperature'] = (isset($device->temperature)) ? $device->temperature : false;
-                $return['devices'][$name]['fanspeed'] = false;	  
+                $return['devices'][$name]['fanspeed'] = 0;	  
                 $return['devices'][$name]['watt'] = $device->gpu_power_usage;	
                 $return['devices'][$name]['hashrate'] = $device->speed_sps;      
                 $return['devices'][$name]['hashrate_2nd'] = 0;   

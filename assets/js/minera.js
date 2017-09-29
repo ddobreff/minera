@@ -26,7 +26,7 @@ function loadScript(url, callback) {
 
 function convertHashrate(hash) {
 	if (!hash) return 0 + 'Kh/s';
-	hash = parseInt(hash);
+	hash = parseFloat(hash);
 	if (hash > 900000000000)
 		return (hash / 1000000000000).toFixed(2) + 'Ph/s';
 	if (hash > 900000000)
@@ -2993,8 +2993,8 @@ function getStats(refresh) {
 						if (networkMinerData.totals) {
 							networkMiners[netKey] = networkMinerData.totals;
 							// Add per network device stats
-							var hashrate = Math.round(networkMinerData.totals.hashrate / 1000);
-							var hashrate_2nd = Math.round(networkMinerData.totals.hashrate_2nd / 1000);
+							var hashrate = networkMinerData.totals.hashrate / 1000.0;
+							var hashrate_2nd = networkMinerData.totals.hashrate_2nd / 1000.0;
 							networkMiners[netKey].hash = hashrate;
 							networkMiners[netKey].hash_2nd = hashrate_2nd;
 
@@ -3034,10 +3034,12 @@ function getStats(refresh) {
 							if (last_share_secs < 0)
 								last_share_secs = 0;
 							var totalWorkedShares = networkMiners[netKey].accepted + networkMiners[netKey].rejected + networkMiners[netKey].hw_errors;
+							if(totalWorkedShares ===0) totalWorkedShares = 1; //avoid divide o
 							var percentageAc = 100 * networkMiners[netKey].accepted / totalWorkedShares;
 							var percentageRe = 100 * networkMiners[netKey].rejected / totalWorkedShares;
 							var percentageHw = 100 * networkMiners[netKey].hw_errors / totalWorkedShares;
 							var totalWorkedShares_2nd = networkMiners[netKey].accepted_2nd + networkMiners[netKey].rejected_2nd + networkMiners[netKey].hw_errors_2nd;
+							if(totalWorkedShares_2nd ===0) totalWorkedShares_2nd = 1; //avoid divide o
 							var percentageAc_2nd = 100 * networkMiners[netKey].accepted_2nd / totalWorkedShares_2nd;
 							var percentageRe_2nd = 100 * networkMiners[netKey].rejected_2nd / totalWorkedShares_2nd;
 							var percentageHw_2nd = 100 * networkMiners[netKey].hw_errors_2nd / totalWorkedShares_2nd;
@@ -3062,7 +3064,7 @@ function getStats(refresh) {
 							}
 							if (networkMiners[netKey].features.reboot) {
 								minerAction += '<span class="btn-action btn-reboot" data-toggle="popover" data-title="reboot OS" data-network="' + dataNetwork +'"><i class="fa fa-refresh"></i></span>';		
-							}							
+							}	
 							if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
 								// New add rows via datatable
 								$('#gpu-network-miner-table-details').dataTable().fnAddData([
@@ -3414,7 +3416,8 @@ function getStats(refresh) {
 					var tPercentageRe_2nd = 0, tPercentageHw_2nd = 0;
 					if (networkMiners.total !== undefined) {
 						var totalShares = networkMiners.total.ac + networkMiners.total.re + networkMiners.total.hw, tPercentageAc = 100 * networkMiners.total.ac / totalShares, tot_last_share_date = Math.min.apply(Math, tLastShares) * 1000;
-						var totalShares_2nd = networkMiners.total.ac_2nd + networkMiners.total.re_2nd + networkMiners.total.hw_2nd, tPercentageAc_2nd = 100 * networkMiners.total.ac_2nd / totalShares;
+						var totalShares_2nd = networkMiners.total.ac_2nd + networkMiners.total.re_2nd + networkMiners.total.hw_2nd, tPercentageAc_2nd = 100 * networkMiners.total.ac_2nd / totalShares_2nd;
+
 						tPercentageRe = 100 * networkMiners.total.re / totalShares;
 						tPercentageHw = 100 * networkMiners.total.hw / totalShares;
 						tPercentageRe_2nd = 100 * networkMiners.total.re_2nd / totalShares_2nd;
