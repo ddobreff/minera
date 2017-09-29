@@ -3058,10 +3058,10 @@ function getStats(refresh) {
 								].join(':');
 							var minerAction = '';
 							if (networkMiners[netKey].features.restart) {
-								minerAction += '<span class="btn-action btn-restart" data-toggle="popover" data-title="restart miner" data-network="' + dataNetwork +'"><i class="fa fa-undo"></i></span>' 			
+								minerAction += '<span class="btn-action btn-restart" data-toggle="popover" data-title="restart miner" data-network="' + dataNetwork +'"><i class="fa fa-undo"></i></span>';		
 							}
 							if (networkMiners[netKey].features.reboot) {
-								minerAction += '<span class="btn-action btn-reboot" data-toggle="popover" data-title="reboot OS" data-network="' + dataNetwork +'"><i class="fa fa-refresh"></i></span>'		
+								minerAction += '<span class="btn-action btn-reboot" data-toggle="popover" data-title="reboot OS" data-network="' + dataNetwork +'"><i class="fa fa-refresh"></i></span>';		
 							}							
 							if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
 								// New add rows via datatable
@@ -3334,7 +3334,7 @@ function getStats(refresh) {
 								e.preventDefault();
 								controlGPU(network, $(this).parent().data('id'), 1);
 							});	
-							table.find('span.btn-mining').on('click',function(e){
+							table.find('span.btn-mining-dual').on('click',function(e){
 								e.preventDefault();
 								controlGPU(network, $(this).parent().data('id'), 2);
 							});													

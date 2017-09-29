@@ -249,3 +249,8 @@ body > .header { position: fixed !important; }
 @media all and (max-width : 1090px) { 
 	.tip-button { display: none;}
 }
+
+
+.btn-action {
+	cursor: pointer;
+}

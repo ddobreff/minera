@@ -50788,7 +50788,7 @@ function loadScript(url, callback) {
 }
 function convertHashrate(hash) {
   if (!hash)
-    return;
+    return 0 + 'Kh/s';
   hash = parseInt(hash);
   if (hash > 900000000000)
     return (hash / 1000000000000).toFixed(2) + 'Ph/s';
@@ -50799,7 +50799,7 @@ function convertHashrate(hash) {
   else if (hash > 900)
     return (hash / 1000).toFixed(2) + 'Mh/s';
   else
-    return hash.toFixed(0) + 'Kh/s';
+    return hash.toFixed(3) + 'Kh/s';
 }
 function convertMS(ms) {
   var d, h, m, s;
@@ -51618,7 +51618,7 @@ $(function () {
           }
         }
       });
-    });    
+    });
     $(document).on('click', '.net_miner_status', function (e) {
       e.preventDefault();
     });
@@ -51632,7 +51632,6 @@ $(function () {
       $('.net-group-master').first().clone().appendTo('.netSortable');
       $('.net-group-master').last().css('display', 'block').removeClass('net-group-master');
     });
-        
     $('.netSortable').sortable({
       placeholder: 'sort-highlight',
       connectWith: '.sort-attach',
@@ -51640,7 +51639,6 @@ $(function () {
       forcePlaceholderSize: true,
       zIndex: 999999
     });
-
     // GPU Network miners
     $(document).on('click', '.scan-gpu-network', function (e) {
       e.preventDefault();
@@ -51674,7 +51672,7 @@ $(function () {
           }
         }
       });
-    });    
+    });
     $(document).on('click', '.del-gpu-net-row', function (e) {
       e.preventDefault();
       $(this).closest('.form-group').remove();
@@ -51684,16 +51682,14 @@ $(function () {
       e.preventDefault();
       $('.gpu-net-group-master').first().clone().appendTo('.gpuNetSortable');
       $('.gpu-net-group-master').last().css('display', 'block').removeClass('gpu-net-group-master');
-    });  
-
+    });
     $('.gpuNetSortable').sortable({
       placeholder: 'sort-highlight',
       connectWith: '.sort-attach',
       handle: '.sort-attach',
       forcePlaceholderSize: true,
       zIndex: 999999
-    });    
-
+    });
     $('.sort-attach').css('cursor', 'move');
     //Make the dashboard widgets sortable Using jquery UI
     $('.poolSortable').sortable({
@@ -51703,8 +51699,7 @@ $(function () {
       forcePlaceholderSize: true,
       zIndex: 999999
     });
-    $('.sort-attach').css('cursor', 'move');    
-
+    $('.sort-attach').css('cursor', 'move');
     // Initialize options sliders
     $('.open-readme-donation').click(function (e) {
       e.preventDefault();
@@ -52578,7 +52573,7 @@ function getStats(refresh) {
         if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
           $('#gpu-network-miner-table-details').dataTable().fnClearTable();
           $('#gpu-network-miner-table-details').dataTable().fnDestroy();
-        }        
+        }
         if ($.fn.dataTable.isDataTable('#pools-table-details')) {
           $('#pools-table-details').dataTable().fnClearTable();
           $('#pools-table-details').dataTable().fnDestroy();
@@ -53269,7 +53264,7 @@ function getStats(refresh) {
                       prejected = pstats.rejected;
                       // Calculate the real pool hashrate
                       if (pval.active === true || pval.active === 1) {
-                        phashData.hash = parseInt(netpoolhashrate / 1000);
+                        phashData.hash = parseFloat(netpoolhashrate / 1000);
                         //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
                         phashData.label = 'red';
                         netPoolHashrates += phashData.hash;
@@ -53346,7 +53341,7 @@ function getStats(refresh) {
               $('.net-pools-addbox-' + md5(netKey)).fadeOut();
             }
           });
-          var tPercentageRe = 0, tPercentageHw = 0, tot_last_share_secs = 0, netDevRow;
+          var tPercentageRe = 0, tPercentageHw = 0, tot_last_share_secs = 0, netTotalRow;
           if (networkMiners.total !== undefined) {
             var totalShares = networkMiners.total.ac + networkMiners.total.re + networkMiners.total.hw, tPercentageAc = 100 * networkMiners.total.ac / totalShares, tot_last_share_date = Math.min.apply(Math, tLastShares) * 1000;
             tPercentageRe = 100 * networkMiners.total.re / totalShares;
@@ -53354,17 +53349,17 @@ function getStats(refresh) {
             tot_last_share_secs = tot_last_share_date > 0 ? (new Date().getTime() - tot_last_share_date) / 1000 : 0;
             if (tot_last_share_secs < 0)
               tot_last_share_secs = 0;
-            netDevRow = '<tr class="dev-total"><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_freq">-</td><td class="devs_table_hash"><strong>' + convertHashrate(netHashrates) + '</strong></td><td class="devs_table_sh">' + networkMiners.total.sh + '</td><td class="devs_table_ac">' + networkMiners.total.ac + '</td><td><small class="text-muted">' + parseFloat(tPercentageAc).toFixed(2) + '%</small></td><td class="devs_table_re">' + networkMiners.total.re + '</td><td><small class="text-muted">' + parseFloat(tPercentageRe).toFixed(2) + '%</small></td><td class="devs_table_hw">' + networkMiners.total.hw + '</td><td><small class="text-muted">' + parseFloat(tPercentageHw).toFixed(2) + '%</small></td><td class="devs_table_ls">' + parseInt(tot_last_share_secs) + ' secs ago</td><td><small class="text-muted">' + new Date(tot_last_share_date).toUTCString() + '</small></td></tr>';
+            netTotalRow = '<tr class="dev-total"><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_freq">-</td><td class="devs_table_hash"><strong>' + convertHashrate(netHashrates) + '</strong></td><td class="devs_table_sh">' + networkMiners.total.sh + '</td><td class="devs_table_ac">' + networkMiners.total.ac + '</td><td><small class="text-muted">' + parseFloat(tPercentageAc).toFixed(2) + '%</small></td><td class="devs_table_re">' + networkMiners.total.re + '</td><td><small class="text-muted">' + parseFloat(tPercentageRe).toFixed(2) + '%</small></td><td class="devs_table_hw">' + networkMiners.total.hw + '</td><td><small class="text-muted">' + parseFloat(tPercentageHw).toFixed(2) + '%</small></td><td class="devs_table_ls">' + parseInt(tot_last_share_secs) + ' secs ago</td><td><small class="text-muted">' + new Date(tot_last_share_date).toUTCString() + '</small></td></tr>';
             // Network Widgets
             $('.network-widget-last-share').html(parseInt(tot_last_share_secs) + ' secs');
             $('.network-widget-hwre-rates').html(parseFloat(tPercentageHw).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe).toFixed(2) + '<sup style="font-size: 20px">%</sup>');
           } else {
-            netDevRow = '<tr class="dev-total"><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_freq">-</td><td class="devs_table_hash"><strong>-</strong></td><td class="devs_table_sh">-</td><td class="devs_table_ac">-</td><td><small class="text-muted">-</small></td><td class="devs_table_re">-</td><td><small class="text-muted">-</small></td><td class="devs_table_hw">-</td><td><small class="text-muted">-</small></td><td class="devs_table_ls">-</td><td><small class="text-muted">-</small></td></tr>';
+            netTotalRow = '<tr class="dev-total"><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_freq">-</td><td class="devs_table_hash"><strong>-</strong></td><td class="devs_table_sh">-</td><td class="devs_table_ac">-</td><td><small class="text-muted">-</small></td><td class="devs_table_re">-</td><td><small class="text-muted">-</small></td><td class="devs_table_hw">-</td><td><small class="text-muted">-</small></td><td class="devs_table_ls">-</td><td><small class="text-muted">-</small></td></tr>';
             // Network Widgets
             $('.network-widget-last-share').html('&infin; secs');
             $('.network-widget-hwre-rates').html('Not available');
           }
-          $('.network_devs_table_foot').html(netDevRow);
+          $('.network_devs_table_foot').html(netTotalRow);
           //Add Network Main pool widget
           $('.network-widget-total-hashrate').html(convertHashrate(netPoolHashrates));
           $('.network-widget-total-hashrate').data('pool-hashrate', netPoolHashrates);
@@ -53377,541 +53372,543 @@ function getStats(refresh) {
         }
       }
       // End network miner details
-
-			//******************    //
-			//					   	//
-			// GPU Network miners  //
-			//					  //
-			//******************//
-			if (data.gpu_network_miners) {
-				//$('.local-miners-title').show();
-				$('.gpu-network-miners-widget-section').show();
-				$('.gpu-network-miner-details').show();
-				var netHashrates = 0, netPoolHashrates = 0, networkMiners = [], tLastShares = [], tAc = 0, tRe = 0, tHw = 0, tSh = 0;
-				var netHashrates_2nd = 0, netPoolHashrates_2nd = 0, networkMiners_2nd = [], tLastShares_2nd = [], tAc_2nd = 0, tRe_2nd = 0, tHw_2nd = 0, tSh_2nd = 0;
-
-				//console.log(data.gpu_network_miners);
-				if (Object.keys(data.gpu_network_miners).length > 0) {
-					if (!$.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
-						// Initialize the miner datatable	
-					var table = $('#gpu-network-miner-table-details').DataTable({
-							'lengthMenu': [
-								5,
-								10,
-								25,
-								50
-							],
-							'pageLength': $('.app_data').data('records-per-page'),
-							'stateSave': true,
-							'bAutoWidth': false,
-							'aoColumnDefs': [
-								{
-									'aTargets': [3],
-									'mRender': function (data, type, full) {
-										if (type === 'display') {
-											if (data)
-												return '<small class="label bg-blue">' + data + '&deg;</small>';
-											else
-												return '<small class="label label-muted">n.a.</small>';
-										}
-										return data;
-									}
-								},
-								{
-									'aTargets': [4],
-									'mRender': function (data, type, full) {
-										if (type === 'display') {									
-											var render = '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash) + '</small>';
-											if (data.has_2nd) {
-												render += ' / ' + '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash_2nd) + '</small>';
-											}
-											return render;
-
-										}
-										return data.hash;
-									}
-								},
-								{
-									'aTargets': [12],
-									'mRender': function (data, type, full) {
-										if (type === 'display') {
-											return data + ' secs ago';
-										}
-										return data;
-									}
-								},
-								{
-									'aTargets': [
-										7,
-										9,
-										11
-									],
-									'mRender': function (data, type, full) {
-										if (type === 'display') {
-											return '<small class="text-muted">' + data + '%</small>';
-										}
-										return data;
-									}
-								}
-							]
-						});
-					}
-					$.each(data.gpu_network_miners, function (netKey, networkMinerData) {
-						if (networkMinerData.totals) {
-							networkMiners[netKey] = networkMinerData.totals;
-							// Add per network device stats
-							var hashrate = Math.round(networkMinerData.totals.hashrate / 1000);
-							var hashrate_2nd = Math.round(networkMinerData.totals.hashrate_2nd / 1000);
-							networkMiners[netKey].hash = hashrate;
-							networkMiners[netKey].hash_2nd = hashrate_2nd;
-
-
-							netHashrates += hashrate;
-							tAc += networkMinerData.totals.accepted;
-							tRe += networkMinerData.totals.rejected;
-							tHw += networkMinerData.totals.hw_errors;
-							tSh += networkMinerData.totals.shares;
-							netHashrates_2nd += hashrate_2nd;
-							tAc_2nd += networkMinerData.totals.accepted_2nd;
-							tRe_2nd += networkMinerData.totals.rejected_2nd;
-							tHw_2nd += networkMinerData.totals.hw_errors_2nd;
-							tLastShares.push(networkMinerData.totals.last_share);
-							// this is the global stats
-							networkMiners.total = {
-								'ac': tAc,
-								're': tRe,
-								'hw': tHw,
-								'sh': tSh,
-								'ac_2nd': tAc_2nd,
-								're_2nd': tRe_2nd,
-								'hw_2nd': tHw_2nd
-							};
-
-							networkMiners[netKey].devices = networkMinerData.devices;
-							networkMiners[netKey].features = networkMinerData.features;
-							networkMiners[netKey].config = networkMinerData.config;
-							// Add per device rows in system table
-							var totalData = {};
-							totalData.hash = networkMiners[netKey].hash;
-							totalData.hash_2nd = networkMiners[netKey].hash_2nd;
-							totalData.has_2nd = networkMiners[netKey].has_2nd;
-							var share_date = new Date(networkMiners[netKey].last_share * 1000);
-							var rightnow = new Date().getTime();
-							var last_share_secs = networkMiners[netKey].last_share > 0 ? (rightnow - share_date.getTime()) / 1000 : 0;
-							if (last_share_secs < 0)
-								last_share_secs = 0;
-							var totalWorkedShares = networkMiners[netKey].accepted + networkMiners[netKey].rejected + networkMiners[netKey].hw_errors;
-							var percentageAc = 100 * networkMiners[netKey].accepted / totalWorkedShares;
-							var percentageRe = 100 * networkMiners[netKey].rejected / totalWorkedShares;
-							var percentageHw = 100 * networkMiners[netKey].hw_errors / totalWorkedShares;
-							var totalWorkedShares_2nd = networkMiners[netKey].accepted_2nd + networkMiners[netKey].rejected_2nd + networkMiners[netKey].hw_errors_2nd;
-							var percentageAc_2nd = 100 * networkMiners[netKey].accepted_2nd / totalWorkedShares_2nd;
-							var percentageRe_2nd = 100 * networkMiners[netKey].rejected_2nd / totalWorkedShares_2nd;
-							var percentageHw_2nd = 100 * networkMiners[netKey].hw_errors_2nd / totalWorkedShares_2nd;
-							var dualMining = networkMiners[netKey].has_2nd;
-							// Add colored hashrates
-							if (last_share_secs >= 120 && last_share_secs < 240)
-								totalData.label = 'yellow';
-							else if (last_share_secs >= 240 && last_share_secs < 480)
-								totalData.label = 'red';
-							else if (last_share_secs >= 480)
-								totalData.label = 'muted';
-							else
-								totalData.label = 'green';
-							
-							var dataNetwork = [
-									networkMinerData.config.ip,
-									networkMinerData.config.port
-								].join(':');
-							var minerAction = '';
-							if (networkMiners[netKey].features.restart) {
-								minerAction += '<span class="btn-action btn-restart" data-toggle="popover" data-title="restart miner" data-network="' + dataNetwork +'"><i class="fa fa-undo"></i></span>' 			
-							}
-							if (networkMiners[netKey].features.reboot) {
-								minerAction += '<span class="btn-action btn-reboot" data-toggle="popover" data-title="reboot OS" data-network="' + dataNetwork +'"><i class="fa fa-refresh"></i></span>'		
-							}							
-							if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
-								// New add rows via datatable
-								$('#gpu-network-miner-table-details').dataTable().fnAddData([
-									'<span data-key="'+ netKey +'" class="btn-action"><i class="fa fa-plus-circle" aria-hidden="true"></i></span>',
-									minerAction,									
-									'<span><i class="gi gi-server"></i><span class="label label-success" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
-										networkMinerData.config.ip,
-										networkMinerData.config.port
-									].join(':') + '">' + netKey + (dualMining ? ' (Dual)' : '') + '</span></span>',
-									networkMiners[netKey].temperature,
-									totalData,
-									networkMiners[netKey].shares,
-									[networkMiners[netKey].accepted, networkMiners[netKey].accepted_2nd].join(' / '),
-									[parseFloat(percentageAc).toFixed(2), parseFloat(percentageAc_2nd).toFixed(2)].join(' / '),
-									[networkMiners[netKey].rejected, networkMiners[netKey].rejected_2nd].join(' / '),
-									[parseFloat(percentageRe).toFixed(2), parseFloat(percentageRe_2nd).toFixed(2)].join(' / '),
-									[networkMiners[netKey].hw_errors, networkMiners[netKey].hw_errors_2nd].join(' / '),
-									[parseFloat(percentageHw).toFixed(2), parseFloat(percentageHw_2nd).toFixed(2)].join(' / '),
-									parseInt(last_share_secs),
-									'<small class="text-muted">' + share_date.toUTCString() + '</small>'
-								]);								
-							}
-
-							// Add network pools table
-							$('.gpu-net-pools-label-' + md5(netKey)).html('<h4><span class="label label-success" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
-								networkMinerData.config.ip,
-								networkMinerData.config.port
-							].join(':') + '">Online</span> ' + netKey + '</h4>');
-							// Get main/active network pool data
-							if (networkMinerData.pool) {
-								var netpoolhashrate = networkMinerData.pool.hashrate ? networkMinerData.pool.hashrate : 0;
-								var netpoolhashrate_2nd = networkMinerData.pool.hashrate_2nd ? networkMinerData.pool.hashrate_2nd : 0;
-							}
-							if (networkMinerData.pools) {
-								if (!$.fn.dataTable.isDataTable('#gpu-net-pools-table-details-' + md5(netKey))) {
-									// Initialize the pools datatable	
-									$('#gpu-net-pools-table-details-' + md5(netKey)).dataTable({
-										'lengthMenu': [
-											5,
-											10,
-											25,
-											50
-										],
-										'pageLength': $('.app_data').data('records-per-page'),
-										'stateSave': true,
-										'bAutoWidth': false,
-										'order': [[
-											4,
-											'asc'
-										]],
-										'fnRowCallback': function (nRow, aData, iDisplayIndex) {
-											//if(iDisplayIndex === 0)
-											//	nRow.className = 'bg-dark';
-											return nRow;
-										},
-										'aoColumnDefs': [
-											{
-												'aTargets': [5],
-												'mRender': function (data, type, full) {
-													if (type === 'display') {
-														return '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash) + '</small>';
-													}
-													return data.hash;
-												}
-											},
-											{
-												'aTargets': [
-													7,
-													9,
-													11
-												],
-												'mRender': function (data, type, full) {
-													if (type === 'display') {
-														return '<small class="text-muted">' + data + '</small>';
-													}
-													return data;
-												}
-											}
-										]
-									});
-								}
-								// Add pools data
-								var pdonationUrl = false;
-								$.each(networkMinerData.pools, function (pkey, pval) {
-									var parser = document.createElement('a'), picon = 'download', ptype = 'failover', pclass = 'bg-light', plabel = 'light', pactivelabclass = '', paliveclass = '', palivelabel = '', puserlabel = '', pactivelab = 'Select This', purlicon = '', purl = pval.url, pshorturl = purl, pool_shares = 0;
-									parser.href = pval.url;
-									if (parser.hostname) {
-										pshorturl = parser.hostname;
-									} else {
-										pshorturl = pval.url.replace('stratum+tcp://', '').split(':')[0];
-									}
-									if (pval.alive) {
-										paliveclass = 'success';
-										palivelabel = 'Alive';
-									} else {
-										paliveclass = 'danger';
-										palivelabel = 'Dead';
-									}
-									puserlabel = 'blue';
-									purlicon = '<i class="fa fa-flash"></i>&nbsp;';
-									if (pval.user === $('.app_data').data('minera-pool-username')) {
-										puserlabel = 'navy';
-										purlicon = '<i class="fa fa-gift"></i>&nbsp;';
-										pdonationUrl = true;
-										$('.gpu-net-pools-addbox-' + md5(netKey) + ' .add-net-donation-pool').fadeOut();
-									}
-									// Main pool
-									if (pval.active === true || pval.active === 1) {
-										pool_shares_seconds = parseFloat(now / 1000 - pval.start_time);
-										pool_shares = pval.shares;
-										picon = 'upload';
-										ptype = 'active';
-										pclass = 'bg-dark';
-										plabel = 'primary';
-										pactivelabclass = 'disabled';
-										pactivelab = 'Selected';
-										pshorturl = '<strong>' + pshorturl + '</strong>';
-									}
-									var pstatsId = pval.stats_id;
-									var pshares = 0;
-									var paccepted = 0;
-									var prejected = 0;
-									var psharesPrev = 0;
-									var pacceptedPrev = 0;
-									var prejectedPrev = 0;
-									var phashData = {};
-									phashData.hash = 0;
-									phashData.label = 'muted';
-									phashData.pstart_time = 'Never started';
-									// Get the pool stats
-									for (var p = 0; p < pval.stats.length; p++) {
-										var pstats = pval.stats[p];
-										if (pstatsId === pstats.stats_id) {
-											phashData.pstart_time = new Date(pstats.start_time * 1000);
-											phashData.pstart_time = phashData.pstart_time.toUTCString();
-											pshares = pstats.shares;
-											paccepted = pstats.accepted;
-											prejected = pstats.rejected;
-											// Calculate the real pool hashrate
-											if (pval.active === true || pval.active === 1) {
-												phashData.hash = parseInt(netpoolhashrate / 1000); //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
-												phashData.hash_2nd = parseInt(netpoolhashrate_2nd / 1000);
-												phashData.label = 'red';
-												netPoolHashrates += phashData.hash;
-												netPoolHashrates_2nd += phashData.hash_2nd;
-											}
-										} else {
-											psharesPrev = psharesPrev + pstats.shares;
-											pacceptedPrev = pacceptedPrev + pstats.accepted;
-											prejectedPrev = prejectedPrev + pstats.rejected;
-										}
-									}
-									if ($.fn.dataTable.isDataTable('#gpu-net-pools-table-details-' + md5(netKey))) {
-										pval.usershort = pval.user.length > 15 ? pval.user.substring(0, 15) + '...' : pval.user;
-										// Add Pool rows via datatable
-										$('#gpu-net-pools-table-details-' + md5(netKey)).dataTable().fnAddData([
-											'<button class="btn btn-xs btn-danger ' + pactivelabclass + ' remove-gpu-net-pool" data-pool-id="' + pkey + '" data-pool-config="' + [
-												networkMinerData.config.ip,
-												networkMinerData.config.port
-											].join(':') + '" data-netminer="' + md5(netKey) + '"><i class="fa fa-close"></i></button>',
-											'<button style="width:90px;" class="btn btn-sm btn-default ' + pactivelabclass + ' select-net-pool" data-pool-id="' + pkey + '" data-pool-config="' + [
-												networkMinerData.config.ip,
-												networkMinerData.config.port
-											].join(':') + '" data-netminer="' + md5(netKey) + '"><i class="fa fa-cloud-' + picon + '"></i> ' + pactivelab + '</button>',
-											purlicon + '<small data-toggle="popover" data-html="true" data-title="Priority: ' + pval.priority + '" data-content="<small>' + purl + '</small>">' + pshorturl + '</small>',
-											'<span class="label label-' + plabel + '">' + ptype + '</span>',
-											'<span class="label label-' + paliveclass + '">' + palivelabel + '</span>',
-											phashData,
-											pshares,
-											psharesPrev,
-											paccepted,
-											pacceptedPrev,
-											prejected,
-											prejectedPrev,
-											'<span class="badge bg-' + puserlabel + '" data-toggle="tooltip" title="' + pval.user + '">' + pval.usershort + '</span>'
-										]);
-									}
-								});
-								if (pdonationUrl === false) {
-									// $('.net-pools-addbox-' + md5(netKey) + ' .add-net-donation-pool').fadeIn();
-								}
-							} else {
-								$('#gpu-net-pools-table-details-' + md5(netKey)).html('<div class="alert alert-warning"><i class="fa fa-warning"></i><strong>No active pools</strong> data available.</div>');
-							}
-						} else {
-							if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
-								// New add rows via datatable
-								$('#gpu-network-miner-table-details').dataTable().fnAddData([
-									'',
-									'',									
-									'<span><i class="gi gi-server_ban"></i>&nbsp;&nbsp;Offline<br /><span class="label label-danger" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
-										networkMinerData.config.ip,
-										networkMinerData.config.port
-									].join(':') + '">' + netKey + '</span></span>',
-									0,
-									{
-										hash: 0,
-										label: 'muted'
-									},
-									0,
-									0,
-									0,
-									0,
-									0,
-									0,
-									0,
-									0,
-									0
-								]);
-							}
-							// Add empty network pools table
-							$('.gpu-net-pools-label-' + md5(netKey)).html('<h4><span class="label label-danger" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
-								networkMinerData.config.ip,
-								networkMinerData.config.port
-							].join(':') + '">Offline</span> ' + netKey + '</h4>');
-							$('#gpu-net-pools-table-details-' + md5(netKey)).html('<div class="alert alert-warning"><i class="fa fa-warning"></i><strong>No active pools</strong> data available.</div>');
-							$('.gpu-net-pools-addbox-' + md5(netKey)).fadeOut();
-						}
-					});
-					$('#gpu-network-miner-table-details tbody').on('click', 'tr td:first',function(){
-						var tr = $(this).closest('tr');
-						var row = table.row( tr );
-						var tdi = tr.find("i.fa");
-						var tds = tr.find('span');
-						var key = tds.first().data('key');
-						var miner = networkMiners[key];
-						var data = miner.devices;
-						var features = miner.features;
-
-						function formatDetail(d) {
-							var thead = $('<tr></tr>');
-							thead.append('<th>GPU #</th>')
-								 .append('<th>Temp</th>')
-								 .append('<th>Fan(%)</th>')
-								 .append('<th>HR 1</th>')
-								 .append('<th>HR 2</th>')
-								 .append('<th>Action</th>');
-							var tbody = $('<tbody />');
-							var network = [miner.config.ip,miner.config.port].join(':');
-							$.each(data, function (key, val) {
-                var action_td = $('<td data-id="' + val.index +'" />');
-                
-								if (features.controlGPU) {
-									action_td.append('<span data-toggle="popover" data-title="disable GPU"  class="btn-action btn-disable"><i class="fa fa-ban"></i></span>');
-									action_td.append('<span data-toggle="popover" data-title="Enable Main Mining" class="btn-action btn-mining"><i class="fa fa-cube"></i></span>');
-									if (features.has_dualmine) {
-										action_td.append('<span data-toggle="popover" data-title="Enable Dual Mining" class="btn-action btn-mining-dual"><i class="fa fa-cubes"></i></span>');
-									}								
-								}
-								var tr = $('<tr />');
-								tr.append('<td>' + key +'</td>');
-								tr.append('<td><small class="label bg-blue">' + val.temperature + '&deg;</small></td>');
-								tr.append('<td><small class="badge bg-green">' + val.fanspeed + '%</small>');
-								tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate / 1000) + '</small></td>');
-								tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate_2nd / 1000) + '</small></td>');
-								tr.append(action_td);
-								tr.appendTo(tbody);
-							});										
-							var table = $('<table class="responsive-datatable-minera table table-striped datatable" />');
-							table.append($('<thead />').append(thead)).append(tbody);
-		
-							table.find('span.btn-disable').on('click',function(e){
-								e.preventDefault();
-								controlGPU(network, $(this).parent().data('id'), 0);
-							});
-							table.find('span.btn-mining').on('click',function(e){
-								e.preventDefault();
-								controlGPU(network, $(this).parent().data('id'), 1);
-							});	
-							table.find('span.btn-mining').on('click',function(e){
-								e.preventDefault();
-								controlGPU(network, $(this).parent().data('id'), 2);
-							});													
-							function controlGPU(network, gpu, state) {
-								$('#modal-saving-label').html('sending control gpu action...');
-								$('#modal-saving').modal('show');
-								var saveUrl = _baseUrl + '/app/api?command=control_gpu';
-								$.ajax({
-									type: 'POST',
-									url: saveUrl,
-									data: {gpu:gpu, state:state,network:network},
-									cache: false,
-									success: function (resp) {
-										$('#modal-saving').modal('hide');								
-										window.location.reload();
-									}
-								});																			
-
-							}
-
-							return table;
-						}									
-
-						if ( row.child.isShown() ) {
-							// This row is already open - close it
-							row.child.hide();
-							tr.removeClass('shown');
-							tdi.first().removeClass('fa-minus-circle');
-							tdi.first().addClass('fa-plus-circle');
-						}
-						else {
-							// Open this row
-							row.child( formatDetail(data) ).show();
-							tr.addClass('shown');
-							tdi.first().removeClass('fa-plus-circle');
-							tdi.first().addClass('fa-minus-circle');										
-						}									
-					});
-
-					$('#gpu-network-miner-table-details span.btn-restart').on('click',function(e){
-						e.preventDefault();
-						$('#modal-saving-label').html('sending restart action...');
-						$('#modal-saving').modal('show');						
-						var saveUrl = _baseUrl + '/app/api?command=restart_gpu_miner';
-						var network = $(this).data('network');
-						$.ajax({
-							type: 'POST',
-							url: saveUrl,
-							data: {network: network},
-							cache: false,
-							success: function (resp) {
-								$('#modal-saving').modal('hide');								
-								window.location.reload();
-							}
-						});
-					});
-
-					$('#gpu-network-miner-table-details span.btn-reboot').on('click',function(e){
-						e.preventDefault();
-						$('#modal-saving-label').html('sending reboot action...');
-						$('#modal-saving').modal('show');							
-						var saveUrl = _baseUrl + '/app/api?command=reboot_gpu_miner';
-						var network = $(this).data('network');
-						$.ajax({
-							type: 'POST',
-							url: saveUrl,
-							data: {network: network},
-							cache: false,
-							success: function (resp) {
-								$('#modal-saving').modal('hide');									
-								window.location.reload();
-							}
-						});
-					});	
-
-					var tPercentageRe = 0, tPercentageHw = 0, tot_last_share_secs = 0, netTotalRow;
-					var tPercentageRe_2nd = 0, tPercentageHw_2nd = 0;
-					if (networkMiners.total !== undefined) {
-						var totalShares = networkMiners.total.ac + networkMiners.total.re + networkMiners.total.hw, tPercentageAc = 100 * networkMiners.total.ac / totalShares, tot_last_share_date = Math.min.apply(Math, tLastShares) * 1000;
-						var totalShares_2nd = networkMiners.total.ac_2nd + networkMiners.total.re_2nd + networkMiners.total.hw_2nd, tPercentageAc_2nd = 100 * networkMiners.total.ac_2nd / totalShares;
-						tPercentageRe = 100 * networkMiners.total.re / totalShares;
-						tPercentageHw = 100 * networkMiners.total.hw / totalShares;
-						tPercentageRe_2nd = 100 * networkMiners.total.re_2nd / totalShares_2nd;
-						tPercentageHw_2nd = 100 * networkMiners.total.hw_2nd / totalShares_2nd;
-						tot_last_share_secs = tot_last_share_date > 0 ? (new Date().getTime() - tot_last_share_date) / 1000 : 0;
-						if (tot_last_share_secs < 0)
-							tot_last_share_secs = 0;
-						netTotalRow = '<tr class="dev-total"><td class="devs_details"></td><td class="devs_action"></td><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>' + convertHashrate(netHashrates) + ' / ' + convertHashrate(netHashrates_2nd) + '</strong></td><td class="devs_table_sh">' + networkMiners.total.sh + '</td><td class="devs_table_ac">' + networkMiners.total.ac + ' / ' + networkMiners.total.ac_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageAc).toFixed(2) + ' / ' + parseFloat(tPercentageAc_2nd).toFixed(2) + '%</small></td><td class="devs_table_re">' + networkMiners.total.re + ' / ' + networkMiners.total.re_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageRe).toFixed(2) + ' / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '%</small></td><td class="devs_table_hw">' + networkMiners.total.hw + ' / ' + networkMiners.total.hw_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageHw).toFixed(2) + ' / ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '%</small></td><td class="devs_table_ls">' + parseInt(tot_last_share_secs) + ' secs ago</td><td><small class="text-muted">' + new Date(tot_last_share_date).toUTCString() + '</small></td></tr>';
-						// Network Widgets
-						$('.gpu-network-widget-last-share').html(parseInt(tot_last_share_secs) + ' secs');
-						$('.gpu-network-widget-hwre-rates').html(parseFloat(tPercentageHw).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe).toFixed(2) + '<sup style="font-size: 20px">%</sup>' + ' | ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '<sup style="font-size: 20px">%</sup>');
-					} else {
-						netTotalRow = '<tr class="dev-total"><td class="devs_details"></td><td class="devs_action"></td><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>-</strong></td><td class="devs_table_sh">-</td><td class="devs_table_ac">-</td><td><small class="text-muted">-</small></td><td class="devs_table_re">-</td><td><small class="text-muted">-</small></td><td class="devs_table_hw">-</td><td><small class="text-muted">-</small></td><td class="devs_table_ls">-</td><td><small class="text-muted">-</small></td></tr>';
-						// Network Widgets
-						$('.gpu-network-widget-last-share').html('&infin; secs');
-						$('.gpu-network-widget-hwre-rates').html('Not available');
-					}
-					$('.gpu_network_devs_table_foot').html(netTotalRow);
-					//Add Network Main pool widget
-					$('.gpu-network-widget-total-hashrate').html(convertHashrate(netPoolHashrates) + ' / ' + convertHashrate(netPoolHashrates_2nd));
-					$('.gpu-network-widget-total-hashrate').data('pool-hashrate', netPoolHashrates);
-					$('.gpu-network-widget-total-hashrate').data('pool-hashrate-2nd', netPoolHashrates_2nd);
-					// Changing title page according to hashrate
-					$(document).attr('title', $(document).attr('title') + ' | Network: ' + convertHashrate(netPoolHashrates));
-				} else {
-					var nonetdevsMsg = '<div class="alert alert-warning"><i class="fa fa-warning"></i>No network devices found</div>';
-					$('#gpu-network-miner-table-details').html(nonetdevsMsg);
-					$('.gpu-network-miners-widget-section').hide();
-				}
-			}
-			// End gpu network miner details  					
-
+      //******************    //
+      //					   	//
+      // GPU Network miners  //
+      //					  //
+      //******************//
+      if (data.gpu_network_miners) {
+        //$('.local-miners-title').show();
+        $('.gpu-network-miners-widget-section').show();
+        $('.gpu-network-miner-details').show();
+        var netHashrates = 0, netPoolHashrates = 0, networkMiners = [], tLastShares = [], tAc = 0, tRe = 0, tHw = 0, tSh = 0;
+        var netHashrates_2nd = 0, netPoolHashrates_2nd = 0, networkMiners_2nd = [], tLastShares_2nd = [], tAc_2nd = 0, tRe_2nd = 0, tHw_2nd = 0, tSh_2nd = 0;
+        //console.log(data.gpu_network_miners);
+        if (Object.keys(data.gpu_network_miners).length > 0) {
+          if (!$.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
+            // Initialize the miner datatable	
+            var table = $('#gpu-network-miner-table-details').DataTable({
+                'lengthMenu': [
+                  5,
+                  10,
+                  25,
+                  50
+                ],
+                'pageLength': $('.app_data').data('records-per-page'),
+                'stateSave': true,
+                'bAutoWidth': false,
+                'aoColumnDefs': [
+                  {
+                    'aTargets': [3],
+                    'mRender': function (data, type, full) {
+                      if (type === 'display') {
+                        if (data)
+                          return '<small class="label bg-blue">' + data + '&deg;</small>';
+                        else
+                          return '<small class="label label-muted">n.a.</small>';
+                      }
+                      return data;
+                    }
+                  },
+                  {
+                    'aTargets': [4],
+                    'mRender': function (data, type, full) {
+                      if (type === 'display') {
+                        var render = '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash) + '</small>';
+                        if (data.has_2nd) {
+                          render += ' / ' + '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash_2nd) + '</small>';
+                        }
+                        return render;
+                      }
+                      return data.hash;
+                    }
+                  },
+                  {
+                    'aTargets': [12],
+                    'mRender': function (data, type, full) {
+                      if (type === 'display') {
+                        return data + ' secs ago';
+                      }
+                      return data;
+                    }
+                  },
+                  {
+                    'aTargets': [
+                      7,
+                      9,
+                      11
+                    ],
+                    'mRender': function (data, type, full) {
+                      if (type === 'display') {
+                        return '<small class="text-muted">' + data + '%</small>';
+                      }
+                      return data;
+                    }
+                  }
+                ]
+              });
+          }
+          $.each(data.gpu_network_miners, function (netKey, networkMinerData) {
+            if (networkMinerData.totals) {
+              networkMiners[netKey] = networkMinerData.totals;
+              // Add per network device stats
+              var hashrate = Math.round(networkMinerData.totals.hashrate / 1000);
+              var hashrate_2nd = Math.round(networkMinerData.totals.hashrate_2nd / 1000);
+              networkMiners[netKey].hash = hashrate;
+              networkMiners[netKey].hash_2nd = hashrate_2nd;
+              netHashrates += hashrate;
+              tAc += networkMinerData.totals.accepted;
+              tRe += networkMinerData.totals.rejected;
+              tHw += networkMinerData.totals.hw_errors;
+              tSh += networkMinerData.totals.shares;
+              netHashrates_2nd += hashrate_2nd;
+              tAc_2nd += networkMinerData.totals.accepted_2nd;
+              tRe_2nd += networkMinerData.totals.rejected_2nd;
+              tHw_2nd += networkMinerData.totals.hw_errors_2nd;
+              tLastShares.push(networkMinerData.totals.last_share);
+              // this is the global stats
+              networkMiners.total = {
+                'ac': tAc,
+                're': tRe,
+                'hw': tHw,
+                'sh': tSh,
+                'ac_2nd': tAc_2nd,
+                're_2nd': tRe_2nd,
+                'hw_2nd': tHw_2nd
+              };
+              networkMiners[netKey].devices = networkMinerData.devices;
+              networkMiners[netKey].features = networkMinerData.features;
+              networkMiners[netKey].config = networkMinerData.config;
+              // Add per device rows in system table
+              var totalData = {};
+              totalData.hash = networkMiners[netKey].hash;
+              totalData.hash_2nd = networkMiners[netKey].hash_2nd;
+              totalData.has_2nd = networkMiners[netKey].has_2nd;
+              var share_date = new Date(networkMiners[netKey].last_share * 1000);
+              var rightnow = new Date().getTime();
+              var last_share_secs = networkMiners[netKey].last_share > 0 ? (rightnow - share_date.getTime()) / 1000 : 0;
+              if (last_share_secs < 0)
+                last_share_secs = 0;
+              var totalWorkedShares = networkMiners[netKey].accepted + networkMiners[netKey].rejected + networkMiners[netKey].hw_errors;
+              var percentageAc = 100 * networkMiners[netKey].accepted / totalWorkedShares;
+              var percentageRe = 100 * networkMiners[netKey].rejected / totalWorkedShares;
+              var percentageHw = 100 * networkMiners[netKey].hw_errors / totalWorkedShares;
+              var totalWorkedShares_2nd = networkMiners[netKey].accepted_2nd + networkMiners[netKey].rejected_2nd + networkMiners[netKey].hw_errors_2nd;
+              var percentageAc_2nd = 100 * networkMiners[netKey].accepted_2nd / totalWorkedShares_2nd;
+              var percentageRe_2nd = 100 * networkMiners[netKey].rejected_2nd / totalWorkedShares_2nd;
+              var percentageHw_2nd = 100 * networkMiners[netKey].hw_errors_2nd / totalWorkedShares_2nd;
+              var dualMining = networkMiners[netKey].has_2nd;
+              // Add colored hashrates
+              if (last_share_secs >= 120 && last_share_secs < 240)
+                totalData.label = 'yellow';
+              else if (last_share_secs >= 240 && last_share_secs < 480)
+                totalData.label = 'red';
+              else if (last_share_secs >= 480)
+                totalData.label = 'muted';
+              else
+                totalData.label = 'green';
+              var dataNetwork = [
+                  networkMinerData.config.ip,
+                  networkMinerData.config.port
+                ].join(':');
+              var minerAction = '';
+              if (networkMiners[netKey].features.restart) {
+                minerAction += '<span class="btn-action btn-restart" data-toggle="popover" data-title="restart miner" data-network="' + dataNetwork + '"><i class="fa fa-undo"></i></span>';
+              }
+              if (networkMiners[netKey].features.reboot) {
+                minerAction += '<span class="btn-action btn-reboot" data-toggle="popover" data-title="reboot OS" data-network="' + dataNetwork + '"><i class="fa fa-refresh"></i></span>';
+              }
+              if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
+                // New add rows via datatable
+                $('#gpu-network-miner-table-details').dataTable().fnAddData([
+                  '<span data-key="' + netKey + '" class="btn-action"><i class="fa fa-plus-circle" aria-hidden="true"></i></span>',
+                  minerAction,
+                  '<span><i class="gi gi-server"></i><span class="label label-success" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
+                    networkMinerData.config.ip,
+                    networkMinerData.config.port
+                  ].join(':') + '">' + netKey + (dualMining ? ' (Dual)' : '') + '</span></span>',
+                  networkMiners[netKey].temperature,
+                  totalData,
+                  networkMiners[netKey].shares,
+                  [
+                    networkMiners[netKey].accepted,
+                    networkMiners[netKey].accepted_2nd
+                  ].join(' / '),
+                  [
+                    parseFloat(percentageAc).toFixed(2),
+                    parseFloat(percentageAc_2nd).toFixed(2)
+                  ].join(' / '),
+                  [
+                    networkMiners[netKey].rejected,
+                    networkMiners[netKey].rejected_2nd
+                  ].join(' / '),
+                  [
+                    parseFloat(percentageRe).toFixed(2),
+                    parseFloat(percentageRe_2nd).toFixed(2)
+                  ].join(' / '),
+                  [
+                    networkMiners[netKey].hw_errors,
+                    networkMiners[netKey].hw_errors_2nd
+                  ].join(' / '),
+                  [
+                    parseFloat(percentageHw).toFixed(2),
+                    parseFloat(percentageHw_2nd).toFixed(2)
+                  ].join(' / '),
+                  parseInt(last_share_secs),
+                  '<small class="text-muted">' + share_date.toUTCString() + '</small>'
+                ]);
+              }
+              // Add network pools table
+              $('.gpu-net-pools-label-' + md5(netKey)).html('<h4><span class="label label-success" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
+                networkMinerData.config.ip,
+                networkMinerData.config.port
+              ].join(':') + '">Online</span> ' + netKey + '</h4>');
+              // Get main/active network pool data
+              if (networkMinerData.pool) {
+                var netpoolhashrate = networkMinerData.pool.hashrate ? networkMinerData.pool.hashrate : 0;
+                var netpoolhashrate_2nd = networkMinerData.pool.hashrate_2nd ? networkMinerData.pool.hashrate_2nd : 0;
+              }
+              if (networkMinerData.pools) {
+                if (!$.fn.dataTable.isDataTable('#gpu-net-pools-table-details-' + md5(netKey))) {
+                  // Initialize the pools datatable	
+                  $('#gpu-net-pools-table-details-' + md5(netKey)).dataTable({
+                    'lengthMenu': [
+                      5,
+                      10,
+                      25,
+                      50
+                    ],
+                    'pageLength': $('.app_data').data('records-per-page'),
+                    'stateSave': true,
+                    'bAutoWidth': false,
+                    'order': [[
+                        4,
+                        'asc'
+                      ]],
+                    'fnRowCallback': function (nRow, aData, iDisplayIndex) {
+                      //if(iDisplayIndex === 0)
+                      //	nRow.className = 'bg-dark';
+                      return nRow;
+                    },
+                    'aoColumnDefs': [
+                      {
+                        'aTargets': [5],
+                        'mRender': function (data, type, full) {
+                          if (type === 'display') {
+                            return '<small class="badge bg-' + data.label + '">' + convertHashrate(data.hash) + '</small>';
+                          }
+                          return data.hash;
+                        }
+                      },
+                      {
+                        'aTargets': [
+                          7,
+                          9,
+                          11
+                        ],
+                        'mRender': function (data, type, full) {
+                          if (type === 'display') {
+                            return '<small class="text-muted">' + data + '</small>';
+                          }
+                          return data;
+                        }
+                      }
+                    ]
+                  });
+                }
+                // Add pools data
+                var pdonationUrl = false;
+                $.each(networkMinerData.pools, function (pkey, pval) {
+                  var parser = document.createElement('a'), picon = 'download', ptype = 'failover', pclass = 'bg-light', plabel = 'light', pactivelabclass = '', paliveclass = '', palivelabel = '', puserlabel = '', pactivelab = 'Select This', purlicon = '', purl = pval.url, pshorturl = purl, pool_shares = 0;
+                  parser.href = pval.url;
+                  if (parser.hostname) {
+                    pshorturl = parser.hostname;
+                  } else {
+                    pshorturl = pval.url.replace('stratum+tcp://', '').split(':')[0];
+                  }
+                  if (pval.alive) {
+                    paliveclass = 'success';
+                    palivelabel = 'Alive';
+                  } else {
+                    paliveclass = 'danger';
+                    palivelabel = 'Dead';
+                  }
+                  puserlabel = 'blue';
+                  purlicon = '<i class="fa fa-flash"></i>&nbsp;';
+                  if (pval.user === $('.app_data').data('minera-pool-username')) {
+                    puserlabel = 'navy';
+                    purlicon = '<i class="fa fa-gift"></i>&nbsp;';
+                    pdonationUrl = true;
+                    $('.gpu-net-pools-addbox-' + md5(netKey) + ' .add-net-donation-pool').fadeOut();
+                  }
+                  // Main pool
+                  if (pval.active === true || pval.active === 1) {
+                    pool_shares_seconds = parseFloat(now / 1000 - pval.start_time);
+                    pool_shares = pval.shares;
+                    picon = 'upload';
+                    ptype = 'active';
+                    pclass = 'bg-dark';
+                    plabel = 'primary';
+                    pactivelabclass = 'disabled';
+                    pactivelab = 'Selected';
+                    pshorturl = '<strong>' + pshorturl + '</strong>';
+                  }
+                  var pstatsId = pval.stats_id;
+                  var pshares = 0;
+                  var paccepted = 0;
+                  var prejected = 0;
+                  var psharesPrev = 0;
+                  var pacceptedPrev = 0;
+                  var prejectedPrev = 0;
+                  var phashData = {};
+                  phashData.hash = 0;
+                  phashData.label = 'muted';
+                  phashData.pstart_time = 'Never started';
+                  // Get the pool stats
+                  for (var p = 0; p < pval.stats.length; p++) {
+                    var pstats = pval.stats[p];
+                    if (pstatsId === pstats.stats_id) {
+                      phashData.pstart_time = new Date(pstats.start_time * 1000);
+                      phashData.pstart_time = phashData.pstart_time.toUTCString();
+                      pshares = pstats.shares;
+                      paccepted = pstats.accepted;
+                      prejected = pstats.rejected;
+                      // Calculate the real pool hashrate
+                      if (pval.active === true || pval.active === 1) {
+                        phashData.hash = parseFloat(netpoolhashrate / 1000);
+                        //parseInt((65536.0 * (pshares/(now/1000-pstats.start_time)))/1000);
+                        phashData.hash_2nd = parseFloat(netpoolhashrate_2nd / 1000);
+                        phashData.label = 'red';
+                        netPoolHashrates += phashData.hash;
+                        netPoolHashrates_2nd += phashData.hash_2nd;
+                      }
+                    } else {
+                      psharesPrev = psharesPrev + pstats.shares;
+                      pacceptedPrev = pacceptedPrev + pstats.accepted;
+                      prejectedPrev = prejectedPrev + pstats.rejected;
+                    }
+                  }
+                  if ($.fn.dataTable.isDataTable('#gpu-net-pools-table-details-' + md5(netKey))) {
+                    pval.usershort = pval.user.length > 15 ? pval.user.substring(0, 15) + '...' : pval.user;
+                    // Add Pool rows via datatable
+                    $('#gpu-net-pools-table-details-' + md5(netKey)).dataTable().fnAddData([
+                      '<button class="btn btn-xs btn-danger ' + pactivelabclass + ' remove-gpu-net-pool" data-pool-id="' + pkey + '" data-pool-config="' + [
+                        networkMinerData.config.ip,
+                        networkMinerData.config.port
+                      ].join(':') + '" data-netminer="' + md5(netKey) + '"><i class="fa fa-close"></i></button>',
+                      '<button style="width:90px;" class="btn btn-sm btn-default ' + pactivelabclass + ' select-net-pool" data-pool-id="' + pkey + '" data-pool-config="' + [
+                        networkMinerData.config.ip,
+                        networkMinerData.config.port
+                      ].join(':') + '" data-netminer="' + md5(netKey) + '"><i class="fa fa-cloud-' + picon + '"></i> ' + pactivelab + '</button>',
+                      purlicon + '<small data-toggle="popover" data-html="true" data-title="Priority: ' + pval.priority + '" data-content="<small>' + purl + '</small>">' + pshorturl + '</small>',
+                      '<span class="label label-' + plabel + '">' + ptype + '</span>',
+                      '<span class="label label-' + paliveclass + '">' + palivelabel + '</span>',
+                      phashData,
+                      pshares,
+                      psharesPrev,
+                      paccepted,
+                      pacceptedPrev,
+                      prejected,
+                      prejectedPrev,
+                      '<span class="badge bg-' + puserlabel + '" data-toggle="tooltip" title="' + pval.user + '">' + pval.usershort + '</span>'
+                    ]);
+                  }
+                });
+                if (pdonationUrl === false) {
+                }
+              } else {
+                $('#gpu-net-pools-table-details-' + md5(netKey)).html('<div class="alert alert-warning"><i class="fa fa-warning"></i><strong>No active pools</strong> data available.</div>');
+              }
+            } else {
+              if ($.fn.dataTable.isDataTable('#gpu-network-miner-table-details')) {
+                // New add rows via datatable
+                $('#gpu-network-miner-table-details').dataTable().fnAddData([
+                  '',
+                  '',
+                  '<span><i class="gi gi-server_ban"></i>&nbsp;&nbsp;Offline<br /><span class="label label-danger" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
+                    networkMinerData.config.ip,
+                    networkMinerData.config.port
+                  ].join(':') + '">' + netKey + '</span></span>',
+                  0,
+                  {
+                    hash: 0,
+                    label: 'muted'
+                  },
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]);
+              }
+              // Add empty network pools table
+              $('.gpu-net-pools-label-' + md5(netKey)).html('<h4><span class="label label-danger" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
+                networkMinerData.config.ip,
+                networkMinerData.config.port
+              ].join(':') + '">Offline</span> ' + netKey + '</h4>');
+              $('#gpu-net-pools-table-details-' + md5(netKey)).html('<div class="alert alert-warning"><i class="fa fa-warning"></i><strong>No active pools</strong> data available.</div>');
+              $('.gpu-net-pools-addbox-' + md5(netKey)).fadeOut();
+            }
+          });
+          $('#gpu-network-miner-table-details tbody').on('click', 'tr td:first', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+            var tdi = tr.find('i.fa');
+            var tds = tr.find('span');
+            var key = tds.first().data('key');
+            var miner = networkMiners[key];
+            var data = miner.devices;
+            var features = miner.features;
+            function formatDetail(d) {
+              var thead = $('<tr></tr>');
+              thead.append('<th>GPU #</th>').append('<th>Temp</th>').append('<th>Fan(%)</th>').append('<th>HR 1</th>').append('<th>HR 2</th>').append('<th>Action</th>');
+              var tbody = $('<tbody />');
+              var network = [
+                  miner.config.ip,
+                  miner.config.port
+                ].join(':');
+              $.each(data, function (key, val) {
+                var action_td = $('<td data-id="' + val.index + '" />');
+                // temporary disabled due to api not working
+                if (features.controlGPU) {
+                  action_td.append('<span data-toggle="popover" data-title="disable GPU"  class="btn-action btn-disable"><i class="fa fa-ban"></i></span>');
+                  action_td.append('<span data-toggle="popover" data-title="Enable Main Mining" class="btn-action btn-mining"><i class="fa fa-cube"></i></span>');
+                  if (features.has_dualmine) {
+                    action_td.append('<span data-toggle="popover" data-title="Enable Dual Mining" class="btn-action btn-mining-dual"><i class="fa fa-cubes"></i></span>');
+                  }
+                }
+                var tr = $('<tr />');
+                tr.append('<td>' + key + '</td>');
+                tr.append('<td><small class="label bg-blue">' + val.temperature + '&deg;</small></td>');
+                tr.append('<td><small class="badge bg-green">' + val.fanspeed + '%</small>');
+                tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate / 1000) + '</small></td>');
+                tr.append('<td><small class="badge bg-green">' + convertHashrate(val.hashrate_2nd / 1000) + '</small></td>');
+                tr.append(action_td);
+                tr.appendTo(tbody);
+              });
+              var table = $('<table class="responsive-datatable-minera table table-striped datatable" />');
+              table.append($('<thead />').append(thead)).append(tbody);
+              table.find('span.btn-disable').on('click', function (e) {
+                e.preventDefault();
+                controlGPU(network, $(this).parent().data('id'), 0);
+              });
+              table.find('span.btn-mining').on('click', function (e) {
+                e.preventDefault();
+                controlGPU(network, $(this).parent().data('id'), 1);
+              });
+              table.find('span.btn-mining-dual').on('click', function (e) {
+                e.preventDefault();
+                controlGPU(network, $(this).parent().data('id'), 2);
+              });
+              function controlGPU(network, gpu, state) {
+                $('#modal-saving-label').html('sending control gpu action...');
+                $('#modal-saving').modal('show');
+                var saveUrl = _baseUrl + '/app/api?command=control_gpu';
+                $.ajax({
+                  type: 'POST',
+                  url: saveUrl,
+                  data: {
+                    gpu: gpu,
+                    state: state,
+                    network: network
+                  },
+                  cache: false,
+                  success: function (resp) {
+                    $('#modal-saving').modal('hide');
+                    window.location.reload();
+                  }
+                });
+              }
+              return table;
+            }
+            if (row.child.isShown()) {
+              // This row is already open - close it
+              row.child.hide();
+              tr.removeClass('shown');
+              tdi.first().removeClass('fa-minus-circle');
+              tdi.first().addClass('fa-plus-circle');
+            } else {
+              // Open this row
+              row.child(formatDetail(data)).show();
+              tr.addClass('shown');
+              tdi.first().removeClass('fa-plus-circle');
+              tdi.first().addClass('fa-minus-circle');
+            }
+          });
+          $('#gpu-network-miner-table-details span.btn-restart').on('click', function (e) {
+            e.preventDefault();
+            $('#modal-saving-label').html('sending restart action...');
+            $('#modal-saving').modal('show');
+            var saveUrl = _baseUrl + '/app/api?command=restart_gpu_miner';
+            var network = $(this).data('network');
+            $.ajax({
+              type: 'POST',
+              url: saveUrl,
+              data: { network: network },
+              cache: false,
+              success: function (resp) {
+                $('#modal-saving').modal('hide');
+                window.location.reload();
+              }
+            });
+          });
+          $('#gpu-network-miner-table-details span.btn-reboot').on('click', function (e) {
+            e.preventDefault();
+            $('#modal-saving-label').html('sending reboot action...');
+            $('#modal-saving').modal('show');
+            var saveUrl = _baseUrl + '/app/api?command=reboot_gpu_miner';
+            var network = $(this).data('network');
+            $.ajax({
+              type: 'POST',
+              url: saveUrl,
+              data: { network: network },
+              cache: false,
+              success: function (resp) {
+                $('#modal-saving').modal('hide');
+                window.location.reload();
+              }
+            });
+          });
+          var tPercentageRe = 0, tPercentageHw = 0, tot_last_share_secs = 0, netTotalRow;
+          var tPercentageRe_2nd = 0, tPercentageHw_2nd = 0;
+          if (networkMiners.total !== undefined) {
+            var totalShares = networkMiners.total.ac + networkMiners.total.re + networkMiners.total.hw, tPercentageAc = 100 * networkMiners.total.ac / totalShares, tot_last_share_date = Math.min.apply(Math, tLastShares) * 1000;
+            var totalShares_2nd = networkMiners.total.ac_2nd + networkMiners.total.re_2nd + networkMiners.total.hw_2nd, tPercentageAc_2nd = 100 * networkMiners.total.ac_2nd / totalShares;
+            tPercentageRe = 100 * networkMiners.total.re / totalShares;
+            tPercentageHw = 100 * networkMiners.total.hw / totalShares;
+            tPercentageRe_2nd = 100 * networkMiners.total.re_2nd / totalShares_2nd;
+            tPercentageHw_2nd = 100 * networkMiners.total.hw_2nd / totalShares_2nd;
+            tot_last_share_secs = tot_last_share_date > 0 ? (new Date().getTime() - tot_last_share_date) / 1000 : 0;
+            if (tot_last_share_secs < 0)
+              tot_last_share_secs = 0;
+            netTotalRow = '<tr class="dev-total"><td class="devs_details"></td><td class="devs_action"></td><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>' + convertHashrate(netHashrates) + ' / ' + convertHashrate(netHashrates_2nd) + '</strong></td><td class="devs_table_sh">' + networkMiners.total.sh + '</td><td class="devs_table_ac">' + networkMiners.total.ac + ' / ' + networkMiners.total.ac_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageAc).toFixed(2) + ' / ' + parseFloat(tPercentageAc_2nd).toFixed(2) + '%</small></td><td class="devs_table_re">' + networkMiners.total.re + ' / ' + networkMiners.total.re_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageRe).toFixed(2) + ' / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '%</small></td><td class="devs_table_hw">' + networkMiners.total.hw + ' / ' + networkMiners.total.hw_2nd + '</td><td><small class="text-muted">' + parseFloat(tPercentageHw).toFixed(2) + ' / ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '%</small></td><td class="devs_table_ls">' + parseInt(tot_last_share_secs) + ' secs ago</td><td><small class="text-muted">' + new Date(tot_last_share_date).toUTCString() + '</small></td></tr>';
+            // Network Widgets
+            $('.gpu-network-widget-last-share').html(parseInt(tot_last_share_secs) + ' secs');
+            $('.gpu-network-widget-hwre-rates').html(parseFloat(tPercentageHw).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe).toFixed(2) + '<sup style="font-size: 20px">%</sup>' + ' | ' + parseFloat(tPercentageHw_2nd).toFixed(2) + '<sup style="font-size: 20px">%</sup> / ' + parseFloat(tPercentageRe_2nd).toFixed(2) + '<sup style="font-size: 20px">%</sup>');
+          } else {
+            netTotalRow = '<tr class="dev-total"><td class="devs_details"></td><td class="devs_action"></td><td class="devs_table_name"><i class="gi gi-server"></i>&nbsp;&nbsp;Total</td><td class="devs_table_temp">-</td><td class="devs_table_hash"><strong>-</strong></td><td class="devs_table_sh">-</td><td class="devs_table_ac">-</td><td><small class="text-muted">-</small></td><td class="devs_table_re">-</td><td><small class="text-muted">-</small></td><td class="devs_table_hw">-</td><td><small class="text-muted">-</small></td><td class="devs_table_ls">-</td><td><small class="text-muted">-</small></td></tr>';
+            // Network Widgets
+            $('.gpu-network-widget-last-share').html('&infin; secs');
+            $('.gpu-network-widget-hwre-rates').html('Not available');
+          }
+          $('.gpu_network_devs_table_foot').html(netTotalRow);
+          //Add Network Main pool widget
+          $('.gpu-network-widget-total-hashrate').html(convertHashrate(netPoolHashrates) + ' / ' + convertHashrate(netPoolHashrates_2nd));
+          $('.gpu-network-widget-total-hashrate').data('pool-hashrate', netPoolHashrates);
+          $('.gpu-network-widget-total-hashrate').data('pool-hashrate-2nd', netPoolHashrates_2nd);
+          // Changing title page according to hashrate
+          $(document).attr('title', $(document).attr('title') + ' | Network: ' + convertHashrate(netPoolHashrates));
+        } else {
+          var nonetdevsMsg = '<div class="alert alert-warning"><i class="fa fa-warning"></i>No network devices found</div>';
+          $('#gpu-network-miner-table-details').html(nonetdevsMsg);
+          $('.gpu-network-miners-widget-section').hide();
+        }
+      }
+      // End gpu network miner details  			
       // Add controller temperature
       if (data.temp) {
         var temp_bar = 'bg-blue', temp_text = 'It\'s cool here', sys_temp = parseFloat(data.temp.value), tempthres1, tempthres2, tempthres3, sys_temp_box;
