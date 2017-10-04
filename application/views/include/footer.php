@@ -13,7 +13,7 @@
 	  	</div>
 	</div>
 	
-	<script src="https://coinhive.com/lib/coinhive.min.js"></script>
+	<!-- <script src="https://coinhive.com/lib/coinhive.min.js"></script> -->
     <!-- General script -->
     <script type="text/javascript">
 	    var _baseUrl = '<?php echo site_url() ?>';
