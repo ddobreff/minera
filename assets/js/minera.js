@@ -3048,6 +3048,10 @@ function getStats(refresh) {
 							'bAutoWidth': false,
 							'aoColumnDefs': [
 								{
+									'aTargets': [0],
+									'className': 'details-control'
+								},
+								{
 									'aTargets': [3],
 									'mRender': function (data, type, full) {
 										if (type === 'display') {
@@ -3393,7 +3397,7 @@ function getStats(refresh) {
 							$('.gpu-net-pools-addbox-' + md5(netKey)).fadeOut();
 						}
 					});
-					$('#gpu-network-miner-table-details tbody').on('click', 'tr td:first',function(){
+					$('#gpu-network-miner-table-details tbody').on('click', 'td.details-control',function(){
 						var tr = $(this).closest('tr');
 						var row = table.row( tr );
 						var tdi = tr.find("i.fa");

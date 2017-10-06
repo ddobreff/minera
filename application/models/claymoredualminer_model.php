@@ -207,7 +207,7 @@ class ClaymoreDualminer_model extends CI_Model {
 		if (isset($stats->result[3])) {
 			
 			$devsHashrates = explode(';',($stats->result[3]));
-			$devsHashrates_2nd = explode(';',($stats->result[4]));
+			$devsHashrates_2nd = explode(';',($stats->result[5]));
 			for($index = 0; $index < count($devsHashrates); $index++)
 			{
 				$d++; $c = 0; $tcfrequency = 0; $tcaccepted = 0; $tcrejected = 0; $tchwerrors = 0; $tcshares = 0; $tchashrate = 0; $tclastshares = array();
@@ -238,21 +238,20 @@ class ClaymoreDualminer_model extends CI_Model {
 			list($totalHash, $totalAccepted, $totalRejected) = explode(";", $stats->result[2]);
 			list($totalHash_2nd, $totalAccepted_2nd, $totalRejected_2nd) = explode(";", $stats->result[4]);
 			list($totalHwerrors,,$totalHwerrors_2nd) = explode(";", $stats->result[8]);
-		
 			$return['totals']['temperature'] = ($tdtemperature) ? round(($tdtemperature/$d), 2) : false;				
 			$return['totals']['accepted'] = intval($totalAccepted);
 			$return['totals']['rejected'] = intval($totalRejected);
 			$return['totals']['hw_errors'] = intval($totalHwerrors);
 			//$return['totals']['shares'] = ($tdshares) ? $tdshares : ($totalAccepted + $totalRejected + $totalHwerrors);
-			$return['totals']['hashrate'] = intval(($tdhashrate) ? $tdhashrate : $totalHash);
+			$return['totals']['hashrate'] = intval($tdhashrate);
 			$return['totals']['shares'] = 0;	
 			$return['totals']['last_share'] = time();	
 			$return['totals']['has_2nd'] = ($tdhashrate_2nd > 0) ? true : false;
-			$return['totals']['hashrate_2nd'] = intval(($tdhashrate_2nd) ? $tdhashrate_2nd : $totalHash_2nd);
+			$return['totals']['hashrate_2nd'] = $tdhashrate_2nd;
 			$return['totals']['accepted_2nd'] = intval($totalAccepted_2nd);
 			$return['totals']['rejected_2nd'] = intval($totalRejected_2nd);
-			$return['totals']['hw_errors_2nd'] = intval($totalHwerrors_2nd);		
-
+			$return['totals']['hw_errors_2nd'] = intval($totalHwerrors_2nd);
+			
 			$features['has_dualmine'] = true;
 			$features['is_dualmine'] = $return['totals']['has_2nd'];
 			$features['restart'] = true;
