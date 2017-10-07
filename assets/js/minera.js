@@ -3142,6 +3142,7 @@ function getStats(refresh) {
 							totalData.hash_2nd = networkMiners[netKey].hash_2nd;
 							totalData.has_2nd = networkMiners[netKey].has_2nd;
 							var share_date = new Date(networkMiners[netKey].last_share * 1000);
+							var start_date = new Date(networkMinerData.start_time * 1000);
 							var rightnow = new Date().getTime();
 							var last_share_secs = networkMiners[netKey].last_share > 0 ? (rightnow - share_date.getTime()) / 1000 : 0;
 							if (last_share_secs < 0)
@@ -3186,7 +3187,7 @@ function getStats(refresh) {
 									'<span><i class="gi gi-server"></i><span class="label label-success" data-toggle="popover" data-title="' + netKey + '" data-content="' + [
 										networkMinerData.config.ip,
 										networkMinerData.config.port
-									].join(':') + '">' + netKey + (dualMining ? ' (Dual)' : '') + '</span></span>',
+									].join(':') + '">' + netKey + (dualMining ? ' (Dual)' : '')  + '</span></span><br/>' + start_date.toLocaleString(),
 									networkMiners[netKey].temperature,
 									totalData,
 									networkMiners[netKey].shares,
@@ -3197,7 +3198,7 @@ function getStats(refresh) {
 									[networkMiners[netKey].hw_errors, networkMiners[netKey].hw_errors_2nd].join(' / '),
 									[parseFloat(percentageHw).toFixed(2), parseFloat(percentageHw_2nd).toFixed(2)].join(' / '),
 									parseInt(last_share_secs),
-									'<small class="text-muted">' + share_date.toUTCString() + '</small>'
+									'<small class="text-muted">' + share_date.toLocaleString() + '</small>'
 								]);								
 							}
 
