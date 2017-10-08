@@ -261,8 +261,13 @@ class ClaymoreZecminer_model extends CI_Model {
 			
 			$return['features'] = $features;		
 			
-			
-			list($url_1, $url_2) = explode(';', $stats->result[7]);
+			$url_1 = '';
+			$url_2 = '';
+			$urls = explode(';', $stats->result[7]);
+
+			$url_1 = $urls[0];
+			if(count($urls) >=2)
+				$url_2 = $urls[1];
 
 			$return['pool']['hashrate'] = $return['totals']['hashrate'];
 			$return['pool']['url'] = $url_1;
